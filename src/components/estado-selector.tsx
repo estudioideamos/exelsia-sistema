@@ -21,8 +21,9 @@ export function EstadoSelector({
 }) {
   const [estado, setEstado] = useState(estadoActual);
 
-  function handleChange(value: string) {
-    const nuevo = value as EstadoOperacion;
+  function handleChange(value: EstadoOperacion | null) {
+    if (!value) return;
+    const nuevo = value;
     setEstado(nuevo);
     // TODO: server action -> actualizarEstadoOperacion() + envío de email vía Resend.
     toast.success(`Estado actualizado a "${ESTADOS[nuevo].label}"`, {
