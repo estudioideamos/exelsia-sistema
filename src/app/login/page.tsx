@@ -33,7 +33,7 @@ export default function LoginPage() {
 
       {/* left branding panel */}
       <div className="relative z-10 hidden w-1/2 flex-col justify-between p-12 lg:flex">
-        <ExelsiaLogo height={40} />
+        <ExelsiaLogo height={56} />
 
         <div className="max-w-md space-y-8">
           <div className="space-y-3">
@@ -73,7 +73,7 @@ export default function LoginPage() {
       {/* right login panel */}
       <div className="relative z-10 flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
         <div className="mb-8 lg:hidden">
-          <ExelsiaLogo height={36} />
+          <ExelsiaLogo height={48} />
         </div>
 
         <LoginForm />

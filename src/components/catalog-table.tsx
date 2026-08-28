@@ -15,6 +15,7 @@ export type CatalogColumn<T> = {
   key: keyof T;
   label: string;
   className?: string;
+  render?: (row: T) => React.ReactNode;
 };
 
 export function CatalogTable<T extends { id: string }>({
@@ -59,7 +60,7 @@ export function CatalogTable<T extends { id: string }>({
                   <TableRow key={row.id}>
                     {columns.map((col) => (
                       <TableCell key={String(col.key)} className={col.className}>
-                        {String(row[col.key] ?? "")}
+                        {col.render ? col.render(row) : String(row[col.key] ?? "")}
                       </TableCell>
                     ))}
                     <TableCell className="text-right">

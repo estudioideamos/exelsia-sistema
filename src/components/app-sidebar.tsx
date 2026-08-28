@@ -58,7 +58,7 @@ export function AppSidebar() {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
       <div className="flex items-center px-5 py-6">
-        <ExelsiaLogo height={34} />
+        <ExelsiaLogo height={46} />
       </div>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
