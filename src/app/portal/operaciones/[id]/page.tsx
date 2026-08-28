@@ -41,6 +41,8 @@ export default async function PortalOperacionDetailPage({
       <AppTopbar
         title={`Operación ${operacion.orden}`}
         description={operacion.descripcion ?? undefined}
+        notificationsBasePath="/portal/operaciones"
+        includeClientesInSearch={false}
       />
       <div className="flex-1 space-y-6 p-6">
         <Badge variant="outline" className={ESTADOS[operacion.estado].className}>

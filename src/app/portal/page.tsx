@@ -31,7 +31,12 @@ export default async function PortalHomePage() {
 
   return (
     <>
-      <AppTopbar title="Mis operaciones" description="Seguimiento en tiempo real de tus envíos" />
+      <AppTopbar
+        title="Mis operaciones"
+        description="Seguimiento en tiempo real de tus envíos"
+        notificationsBasePath="/portal/operaciones"
+        includeClientesInSearch={false}
+      />
       <div className="flex-1 space-y-6 p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Card className="border-border/60">
