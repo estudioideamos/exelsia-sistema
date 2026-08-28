@@ -14,7 +14,15 @@ export async function actualizarEstadoOperacion(operacionId: string, nuevoEstado
 
   const { data: operacionAnterior } = await supabase
     .from("operaciones")
-    .select("estado, orden, cliente_id, clientes(nombre, email_contacto)")
+    .select(
+      `estado, orden, cliente_id, awb_bl, fecha_arribo, forwarder, factura, fob,
+       clientes(nombre, email_contacto),
+       exportadores(nombre),
+       paises(nombre),
+       vias(nombre),
+       incoterms(nombre),
+       divisas(nombre)`
+    )
     .eq("id", operacionId)
     .maybeSingle();
 
@@ -35,6 +43,11 @@ export async function actualizarEstadoOperacion(operacionId: string, nuevoEstado
   const cliente = operacionAnterior?.clientes as unknown as
     | { nombre: string; email_contacto: string | null }
     | null;
+  const exportador = operacionAnterior?.exportadores as unknown as { nombre: string } | null;
+  const origen = operacionAnterior?.paises as unknown as { nombre: string } | null;
+  const via = operacionAnterior?.vias as unknown as { nombre: string } | null;
+  const incoterm = operacionAnterior?.incoterms as unknown as { nombre: string } | null;
+  const divisa = operacionAnterior?.divisas as unknown as { nombre: string } | null;
 
   let emailEnviado = false;
   if (cliente?.email_contacto) {
@@ -43,6 +56,16 @@ export async function actualizarEstadoOperacion(operacionId: string, nuevoEstado
       cliente: cliente.nombre,
       orden: operacionAnterior?.orden ?? "",
       nuevoEstado,
+      exportador: exportador?.nombre,
+      origen: origen?.nombre,
+      via: via?.nombre,
+      incoterm: incoterm?.nombre,
+      divisa: divisa?.nombre,
+      fob: operacionAnterior?.fob,
+      awbBl: operacionAnterior?.awb_bl,
+      fechaArribo: operacionAnterior?.fecha_arribo,
+      forwarder: operacionAnterior?.forwarder,
+      factura: operacionAnterior?.factura,
     });
   }
 

@@ -27,6 +27,7 @@ export default async function PaisesPage() {
       title="Países"
       description={`${paises.length} países registrados`}
       addLabel="Nuevo país"
+      table="paises"
       columns={[
         {
           key: "nombre",

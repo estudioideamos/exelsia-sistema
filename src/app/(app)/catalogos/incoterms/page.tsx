@@ -11,6 +11,7 @@ export default async function IncotermsPage() {
       title="Incoterms"
       description={`${incoterms.length} incoterms registrados`}
       addLabel="Nuevo incoterm"
+      table="incoterms"
       columns={[{ key: "nombre", label: "Nombre" }]}
       rows={incoterms}
     />

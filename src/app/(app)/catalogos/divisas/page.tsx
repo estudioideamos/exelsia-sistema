@@ -11,6 +11,7 @@ export default async function DivisasPage() {
       title="Divisas"
       description={`${divisas.length} divisas registradas`}
       addLabel="Nueva divisa"
+      table="divisas"
       columns={[{ key: "nombre", label: "Nombre" }]}
       rows={divisas}
     />

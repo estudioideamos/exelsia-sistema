@@ -19,6 +19,7 @@ export default async function ViasPage() {
       title="Vías"
       description={`${vias.length} vías registradas`}
       addLabel="Nueva vía"
+      table="vias"
       columns={[
         {
           key: "nombre",

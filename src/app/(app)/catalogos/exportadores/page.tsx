@@ -14,6 +14,7 @@ export default async function ExportadoresPage() {
       title="Exportadores"
       description={`${exportadores.length} exportadores registrados`}
       addLabel="Nuevo exportador"
+      table="exportadores"
       columns={[
         { key: "nombre", label: "Nombre" },
         { key: "cuit", label: "País / CUIT" },
