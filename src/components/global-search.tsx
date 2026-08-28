@@ -32,7 +32,24 @@ export function GlobalSearch({
   const [operaciones, setOperaciones] = useState<ResultadoOperacion[]>([]);
   const [clientes, setClientes] = useState<ResultadoCliente[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    function handleShortcut(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setOpen(true);
+      }
+      if (e.key === "Escape") {
+        inputRef.current?.blur();
+        setOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleShortcut);
+    return () => document.removeEventListener("keydown", handleShortcut);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -86,8 +103,9 @@ export function GlobalSearch({
     <div ref={containerRef} className="relative hidden md:block">
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
+        ref={inputRef}
         placeholder="Buscar orden, cliente, AWB/BL..."
-        className="w-72 pl-9"
+        className="w-72 pl-9 pr-12"
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -95,6 +113,11 @@ export function GlobalSearch({
         }}
         onFocus={() => setOpen(true)}
       />
+      {!query ? (
+        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-border/60 bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+          ⌘K
+        </kbd>
+      ) : null}
 
       {open && query.trim().length >= 2 && (
         <div className="absolute right-0 top-full z-30 mt-2 w-96 rounded-lg border border-border/60 bg-popover shadow-lg">

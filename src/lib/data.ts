@@ -161,3 +161,67 @@ export async function getHistorial() {
     changed_by_nombre: f.changed_by ? (nombrePorUserId.get(f.changed_by) ?? "Usuario") : "Sistema",
   }));
 }
+
+export async function getHistorialOperacion(operacionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("operacion_estado_historial")
+    .select("id, estado_anterior, estado_nuevo, changed_at, changed_by")
+    .eq("operacion_id", operacionId)
+    .order("changed_at", { ascending: true });
+  if (error) throw error;
+
+  const filas = data ?? [];
+  const userIds = [...new Set(filas.map((f) => f.changed_by).filter(Boolean))] as string[];
+  const nombrePorUserId = new Map<string, string>();
+  if (userIds.length) {
+    const { data: perfiles } = await supabase
+      .from("profiles")
+      .select("id, nombre")
+      .in("id", userIds);
+    for (const p of perfiles ?? []) {
+      if (p.nombre) nombrePorUserId.set(p.id, p.nombre);
+    }
+  }
+
+  return filas.map((f) => ({
+    ...f,
+    changed_by_nombre: f.changed_by ? (nombrePorUserId.get(f.changed_by) ?? "Usuario") : "Sistema",
+  })) as (typeof filas[number] & { changed_by_nombre: string })[];
+}
+
+export type NotaOperacion = {
+  id: string;
+  texto: string;
+  created_at: string;
+  autor_id: string;
+  autor_nombre: string;
+};
+
+export async function getNotasOperacion(operacionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("operacion_notas")
+    .select("id, texto, created_at, autor_id")
+    .eq("operacion_id", operacionId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  const filas = data ?? [];
+  const autorIds = [...new Set(filas.map((f) => f.autor_id))];
+  const nombrePorAutorId = new Map<string, string>();
+  if (autorIds.length) {
+    const { data: perfiles } = await supabase
+      .from("profiles")
+      .select("id, nombre")
+      .in("id", autorIds);
+    for (const p of perfiles ?? []) {
+      if (p.nombre) nombrePorAutorId.set(p.id, p.nombre);
+    }
+  }
+
+  return filas.map((f) => ({
+    ...f,
+    autor_nombre: nombrePorAutorId.get(f.autor_id) ?? "Usuario",
+  })) as NotaOperacion[];
+}

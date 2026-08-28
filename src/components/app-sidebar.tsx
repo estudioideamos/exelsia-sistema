@@ -103,14 +103,6 @@ export function AppSidebar({
         collapsed ? "w-[68px]" : "w-64"
       )}
     >
-      <button
-        onClick={toggle}
-        title={collapsed ? "Expandir menú" : "Colapsar menú"}
-        className="absolute -right-3.5 top-8 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-sidebar-border bg-primary text-primary-foreground shadow-md transition-transform hover:scale-110"
-      >
-        <ChevronsLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
-      </button>
-
       <div className={cn("flex items-center px-5 py-6", collapsed && "justify-center px-0")}>
         <ExelsiaLogo height={collapsed ? 32 : 46} iconOnly={collapsed} />
       </div>
@@ -166,6 +158,20 @@ export function AppSidebar({
           )}
         </div>
       </div>
+
+      <button
+        onClick={toggle}
+        title={collapsed ? "Expandir menú" : "Colapsar menú"}
+        className={cn(
+          "flex items-center gap-2 border-t border-sidebar-border px-3 py-2.5 text-xs font-medium text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+          collapsed && "justify-center"
+        )}
+      >
+        <ChevronsLeft
+          className={cn("h-4 w-4 shrink-0 transition-transform", collapsed && "rotate-180")}
+        />
+        {collapsed ? null : "Colapsar menú"}
+      </button>
     </aside>
   );
 }

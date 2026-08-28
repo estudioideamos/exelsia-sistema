@@ -1,5 +1,6 @@
 import { NotificationsBell } from "@/components/notifications-bell";
 import { GlobalSearch } from "@/components/global-search";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AppTopbar({
   title,
@@ -26,6 +27,7 @@ export function AppTopbar({
           includeClientes={includeClientesInSearch}
         />
         <NotificationsBell basePath={notificationsBasePath} />
+        <ThemeToggle />
       </div>
     </header>
   );
