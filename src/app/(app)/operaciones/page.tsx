@@ -1,6 +1,7 @@
 import { AppTopbar } from "@/components/app-topbar";
 import { OperacionDialog } from "@/components/operacion-dialog";
 import { OperacionesTable } from "@/components/operaciones-table";
+import { ImportOperacionesButton } from "@/components/import-operaciones-button";
 import { getOperaciones } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { Plus } from "lucide-react";
@@ -26,7 +27,8 @@ export default async function OperacionesPage() {
         description={`${operaciones.length} operaciones registradas`}
       />
       <div className="flex-1 space-y-4 p-6">
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end gap-2">
+          <ImportOperacionesButton />
           <OperacionDialog
             trigger={
               <Button size="sm">

@@ -106,9 +106,9 @@ export function AppSidebar({
       <button
         onClick={toggle}
         title={collapsed ? "Expandir menú" : "Colapsar menú"}
-        className="absolute -right-3 top-8 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground/70 shadow-sm transition-colors hover:text-sidebar-foreground"
+        className="absolute -right-3.5 top-8 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-sidebar-border bg-primary text-primary-foreground shadow-md transition-transform hover:scale-110"
       >
-        <ChevronsLeft className={cn("h-3.5 w-3.5 transition-transform", collapsed && "rotate-180")} />
+        <ChevronsLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
       </button>
 
       <div className={cn("flex items-center px-5 py-6", collapsed && "justify-center px-0")}>

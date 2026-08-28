@@ -1,6 +1,7 @@
 import { AppTopbar } from "@/components/app-topbar";
 import { NuevoClienteDialog } from "@/components/nuevo-cliente-dialog";
 import { ClientesGrid } from "@/components/clientes-grid";
+import { ImportClientesButton } from "@/components/import-clientes-button";
 import { getClientes } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,7 +16,8 @@ export default async function ClientesPage() {
     <>
       <AppTopbar title="Clientes" description={`${clientes.length} clientes registrados`} />
       <div className="flex-1 space-y-4 p-6">
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end gap-2">
+          <ImportClientesButton />
           <NuevoClienteDialog paises={paises ?? []} />
         </div>
 
