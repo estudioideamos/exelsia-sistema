@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExportMenu } from "@/components/export-menu";
+import { TablePagination, usePagination } from "@/components/table-pagination";
 import { Mail, Phone } from "lucide-react";
 
 type Cliente = {
@@ -35,6 +36,7 @@ const COLUMNAS_EXPORT = [
 
 export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
+  const pagination = usePagination(clientes, 30);
 
   function toggle(id: string) {
     setSeleccionados((prev) => {
@@ -82,7 +84,7 @@ export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {clientes.map((cliente) => {
+        {pagination.paginated.map((cliente) => {
           const operacionesActivas = Array.isArray(cliente.operaciones)
             ? (cliente.operaciones[0]?.count ?? 0)
             : 0;
@@ -138,6 +140,17 @@ export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
             </Card>
           );
         })}
+      </div>
+
+      <div className="rounded-lg border border-border/60">
+        <TablePagination
+          page={pagination.page}
+          setPage={pagination.setPage}
+          pageSize={pagination.pageSize}
+          setPageSize={pagination.setPageSize}
+          pageCount={pagination.pageCount}
+          total={pagination.total}
+        />
       </div>
     </div>
   );

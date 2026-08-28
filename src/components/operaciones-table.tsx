@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ExportMenu } from "@/components/export-menu";
+import { TablePagination, usePagination } from "@/components/table-pagination";
 import { ESTADOS } from "@/lib/mock-data";
 import type { OperacionRow } from "@/lib/data";
 import { Plane, Ship as ShipIcon, Truck } from "lucide-react";
@@ -39,6 +40,7 @@ const COLUMNAS_EXPORT = [
 
 export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] }) {
   const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set());
+  const pagination = usePagination(operaciones);
 
   const todasSeleccionadas = operaciones.length > 0 && seleccionadas.size === operaciones.length;
 
@@ -115,7 +117,7 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
                   </TableCell>
                 </TableRow>
               ) : (
-                operaciones.map((op) => {
+                pagination.paginated.map((op) => {
                   const Icon = (op.via?.nombre && viaIcon[op.via.nombre]) || ShipIcon;
                   return (
                     <TableRow key={op.id} className="group" data-state={seleccionadas.has(op.id) ? "selected" : undefined}>
@@ -173,6 +175,14 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
             </TableBody>
           </Table>
         </div>
+        <TablePagination
+          page={pagination.page}
+          setPage={pagination.setPage}
+          pageSize={pagination.pageSize}
+          setPageSize={pagination.setPageSize}
+          pageCount={pagination.pageCount}
+          total={pagination.total}
+        />
       </Card>
     </div>
   );

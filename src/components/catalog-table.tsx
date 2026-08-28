@@ -41,6 +41,7 @@ import {
   crearItemCatalogo,
   eliminarItemCatalogo,
 } from "@/app/(app)/catalogos/actions";
+import { TablePagination, usePagination } from "@/components/table-pagination";
 
 export type CatalogColumn<T> = {
   key: keyof T;
@@ -114,6 +115,7 @@ export function CatalogTable<T extends Row>({
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<T | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const pagination = usePagination(rows);
 
   async function handleCreate(datos: Record<string, string>) {
     try {
@@ -192,7 +194,7 @@ export function CatalogTable<T extends Row>({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row) => (
+                {pagination.paginated.map((row) => (
                   <TableRow key={row.id}>
                     {columns.map((col) => {
                       const display = row[`_display_${String(col.key)}`];
@@ -251,6 +253,14 @@ export function CatalogTable<T extends Row>({
               </TableBody>
             </Table>
           </div>
+          <TablePagination
+            page={pagination.page}
+            setPage={pagination.setPage}
+            pageSize={pagination.pageSize}
+            setPageSize={pagination.setPageSize}
+            pageCount={pagination.pageCount}
+            total={pagination.total}
+          />
         </Card>
       </div>
 

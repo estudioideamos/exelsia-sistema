@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -12,6 +13,8 @@ import {
   Truck,
   Building2,
   Settings,
+  History,
+  ChevronsLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExelsiaLogo } from "@/components/exelsia-logo";
@@ -25,6 +28,7 @@ const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/operaciones", label: "Operaciones", icon: Ship },
   { href: "/clientes", label: "Clientes", icon: Users },
+  { href: "/historial", label: "Historial", icon: History },
 ];
 
 const catalogos = [
@@ -35,21 +39,30 @@ const catalogos = [
   { href: "/catalogos/exportadores", label: "Exportadores", icon: Building2 },
 ];
 
-function NavLink({ href, label, icon: Icon }: (typeof nav)[number]) {
+const STORAGE_KEY = "exelsia_sidebar_collapsed";
+
+function NavLink({
+  href,
+  label,
+  icon: Icon,
+  collapsed,
+}: (typeof nav)[number] & { collapsed: boolean }) {
   const pathname = usePathname();
   const active = pathname === href || pathname.startsWith(href + "/");
   return (
     <Link
       href={href}
+      title={collapsed ? label : undefined}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        collapsed && "justify-center px-0",
         active
           ? "bg-sidebar-primary/15 text-sidebar-primary"
           : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
-      {label}
+      {collapsed ? null : label}
     </Link>
   );
 }
@@ -59,52 +72,98 @@ export function AppSidebar({
 }: {
   user: { email: string; nombre: string | null; role: "admin" | "cliente" };
 }) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setCollapsed(window.localStorage.getItem(STORAGE_KEY) === "1");
+    setHydrated(true);
+  }, []);
+
+  function toggle() {
+    setCollapsed((prev) => {
+      const next = !prev;
+      window.localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
+      return next;
+    });
+  }
+
   const initials = (user.nombre || user.email)
     .split(" ")
     .slice(0, 2)
     .map((w) => w[0])
     .join("")
     .toUpperCase();
+
   return (
-    <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
-      <div className="flex items-center px-5 py-6">
-        <ExelsiaLogo height={46} />
+    <aside
+      className={cn(
+        "relative hidden shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex",
+        hydrated ? "transition-[width] duration-200" : "",
+        collapsed ? "w-[68px]" : "w-64"
+      )}
+    >
+      <button
+        onClick={toggle}
+        title={collapsed ? "Expandir menú" : "Colapsar menú"}
+        className="absolute -right-3 top-8 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground/70 shadow-sm transition-colors hover:text-sidebar-foreground"
+      >
+        <ChevronsLeft className={cn("h-3.5 w-3.5 transition-transform", collapsed && "rotate-180")} />
+      </button>
+
+      <div className={cn("flex items-center px-5 py-6", collapsed && "justify-center px-0")}>
+        <ExelsiaLogo height={collapsed ? 32 : 46} iconOnly={collapsed} />
       </div>
 
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
+      <nav className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden px-3 py-2">
         <div className="space-y-1">
           {nav.map((item) => (
-            <NavLink key={item.href} {...item} />
+            <NavLink key={item.href} {...item} collapsed={collapsed} />
           ))}
         </div>
 
         <div>
-          <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
-            Catálogos
-          </p>
+          {collapsed ? (
+            <div className="mx-auto mb-2 h-px w-6 bg-sidebar-border" />
+          ) : (
+            <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+              Catálogos
+            </p>
+          )}
           <div className="space-y-1">
             {catalogos.map((item) => (
-              <NavLink key={item.href} {...item} />
+              <NavLink key={item.href} {...item} collapsed={collapsed} />
             ))}
           </div>
         </div>
       </nav>
 
       <div className="border-t border-sidebar-border p-3">
-        <NavLink href="/configuracion" label="Configuración" icon={Settings} />
-        <div className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2">
-          <Avatar className="h-8 w-8">
+        <NavLink href="/configuracion" label="Configuración" icon={Settings} collapsed={collapsed} />
+        <div
+          className={cn(
+            "mt-2 flex items-center gap-3 rounded-lg px-3 py-2",
+            collapsed && "flex-col gap-2 px-0"
+          )}
+        >
+          <Avatar className="h-8 w-8 shrink-0">
             <AvatarFallback className="bg-sidebar-primary/20 text-sidebar-primary text-xs">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="min-w-0 flex-1 leading-tight">
-            <p className="truncate text-xs font-medium">{user.nombre || user.email}</p>
-            <p className="text-[11px] text-sidebar-foreground/50">
-              {user.role === "admin" ? "Administrador" : "Cliente"}
-            </p>
-          </div>
-          <LogoutButton />
+          {collapsed ? (
+            <LogoutButton />
+          ) : (
+            <>
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="truncate text-xs font-medium">{user.nombre || user.email}</p>
+                <p className="text-[11px] text-sidebar-foreground/50">
+                  {user.role === "admin" ? "Administrador" : "Cliente"}
+                </p>
+              </div>
+              <LogoutButton />
+            </>
+          )}
         </div>
       </div>
     </aside>

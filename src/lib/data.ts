@@ -122,3 +122,42 @@ export async function getOperacionesPorCliente(clienteId: string) {
   if (error) throw error;
   return (data ?? []) as unknown as OperacionRow[];
 }
+
+export type HistorialRow = {
+  id: string;
+  estado_anterior: EstadoOperacion | null;
+  estado_nuevo: EstadoOperacion;
+  changed_at: string;
+  changed_by: string | null;
+  operacion: { id: string; orden: string; cliente: { nombre: string } | null } | null;
+};
+
+export async function getHistorial() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("operacion_estado_historial")
+    .select(
+      "id, estado_anterior, estado_nuevo, changed_at, changed_by, operacion:operaciones(id, orden, cliente:clientes(nombre))"
+    )
+    .order("changed_at", { ascending: false })
+    .limit(300);
+  if (error) throw error;
+
+  const filas = (data ?? []) as unknown as HistorialRow[];
+  const userIds = [...new Set(filas.map((f) => f.changed_by).filter(Boolean))] as string[];
+  const nombrePorUserId = new Map<string, string>();
+  if (userIds.length) {
+    const { data: perfiles } = await supabase
+      .from("profiles")
+      .select("id, nombre")
+      .in("id", userIds);
+    for (const p of perfiles ?? []) {
+      if (p.nombre) nombrePorUserId.set(p.id, p.nombre);
+    }
+  }
+
+  return filas.map((f) => ({
+    ...f,
+    changed_by_nombre: f.changed_by ? (nombrePorUserId.get(f.changed_by) ?? "Usuario") : "Sistema",
+  }));
+}
