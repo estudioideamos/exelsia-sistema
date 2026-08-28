@@ -12,10 +12,10 @@ import {
   Truck,
   Building2,
   Settings,
-  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExelsiaLogo } from "@/components/exelsia-logo";
+import { LogoutButton } from "@/components/logout-button";
 import {
   Avatar,
   AvatarFallback,
@@ -54,7 +54,17 @@ function NavLink({ href, label, icon: Icon }: (typeof nav)[number]) {
   );
 }
 
-export function AppSidebar() {
+export function AppSidebar({
+  user,
+}: {
+  user: { email: string; nombre: string | null; role: "admin" | "cliente" };
+}) {
+  const initials = (user.nombre || user.email)
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
       <div className="flex items-center px-5 py-6">
@@ -85,20 +95,16 @@ export function AppSidebar() {
         <div className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-sidebar-primary/20 text-sidebar-primary text-xs">
-              AD
+              {initials}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1 leading-tight">
-            <p className="truncate text-xs font-medium">admin@exelsia.com.ar</p>
-            <p className="text-[11px] text-sidebar-foreground/50">Administrador</p>
+            <p className="truncate text-xs font-medium">{user.nombre || user.email}</p>
+            <p className="text-[11px] text-sidebar-foreground/50">
+              {user.role === "admin" ? "Administrador" : "Cliente"}
+            </p>
           </div>
-          <Link
-            href="/login"
-            className="text-sidebar-foreground/40 hover:text-sidebar-foreground"
-            title="Cerrar sesión"
-          >
-            <LogOut className="h-4 w-4" />
-          </Link>
+          <LogoutButton />
         </div>
       </div>
     </aside>

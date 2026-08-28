@@ -1,23 +1,27 @@
 import { CatalogTable } from "@/components/catalog-table";
+import { createClient } from "@/lib/supabase/server";
 
-const paises = [
-  { nombre: "Argentina", iso: "ar" },
-  { nombre: "México", iso: "mx" },
-  { nombre: "USA", iso: "us" },
-  { nombre: "Alemania", iso: "de" },
-  { nombre: "Varios", iso: null },
-  { nombre: "Corea del Sur", iso: "kr" },
-  { nombre: "Suiza", iso: "ch" },
-  { nombre: "Italia", iso: "it" },
-  { nombre: "Malasia", iso: "my" },
-  { nombre: "China", iso: "cn" },
-  { nombre: "España", iso: "es" },
-  { nombre: "Taiwán", iso: "tw" },
-  { nombre: "Canadá", iso: "ca" },
-  { nombre: "Brasil", iso: "br" },
-].map((pais, i) => ({ id: String(i), ...pais }));
+const ISO_BY_NOMBRE: Record<string, string> = {
+  Argentina: "ar",
+  México: "mx",
+  USA: "us",
+  Alemania: "de",
+  "Corea del Sur": "kr",
+  Suiza: "ch",
+  Italia: "it",
+  Malasia: "my",
+  China: "cn",
+  España: "es",
+  Taiwán: "tw",
+  Canadá: "ca",
+  Brasil: "br",
+};
 
-export default function PaisesPage() {
+export default async function PaisesPage() {
+  const supabase = await createClient();
+  const { data } = await supabase.from("paises").select("id, nombre").order("nombre");
+  const paises = data ?? [];
+
   return (
     <CatalogTable
       title="Países"
@@ -27,18 +31,21 @@ export default function PaisesPage() {
         {
           key: "nombre",
           label: "Nombre",
-          render: (row) => (
-            <span className="flex items-center gap-2.5">
-              {row.iso ? (
-                <span className={`fi fi-${row.iso} rounded-[3px] shadow-sm`} />
-              ) : (
-                <span className="flex h-[0.75em] w-[1em] items-center justify-center rounded-[3px] bg-muted text-[10px]">
-                  🌐
-                </span>
-              )}
-              {row.nombre}
-            </span>
-          ),
+          render: (row) => {
+            const iso = ISO_BY_NOMBRE[row.nombre];
+            return (
+              <span className="flex items-center gap-2.5">
+                {iso ? (
+                  <span className={`fi fi-${iso} rounded-[3px] shadow-sm`} />
+                ) : (
+                  <span className="flex h-[0.75em] w-[1em] items-center justify-center rounded-[3px] bg-muted text-[10px]">
+                    🌐
+                  </span>
+                )}
+                {row.nombre}
+              </span>
+            );
+          },
         },
       ]}
       rows={paises}

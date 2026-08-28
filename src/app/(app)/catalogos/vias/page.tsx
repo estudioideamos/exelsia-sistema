@@ -1,11 +1,11 @@
 import { CatalogTable } from "@/components/catalog-table";
+import { createClient } from "@/lib/supabase/server";
 
-const vias = ["Aéreo", "Marítimo", "Terrestre camión", "Terrestre tren"].map((nombre, i) => ({
-  id: String(i),
-  nombre,
-}));
+export default async function ViasPage() {
+  const supabase = await createClient();
+  const { data } = await supabase.from("vias").select("id, nombre").order("nombre");
+  const vias = data ?? [];
 
-export default function ViasPage() {
   return (
     <CatalogTable
       title="Vías"

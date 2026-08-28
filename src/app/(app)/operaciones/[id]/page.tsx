@@ -5,27 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { EstadoSelector } from "@/components/estado-selector";
-import { ESTADOS, operaciones } from "@/lib/mock-data";
-import { FileText, Download, UploadCloud } from "lucide-react";
-
-const campos = (op: (typeof operaciones)[number]) => [
-  { label: "Cliente", value: op.cliente },
-  { label: "Exportador", value: op.exportador },
-  { label: "Origen", value: op.origen },
-  { label: "Vía", value: op.via },
-  { label: "Incoterm", value: op.incoterm },
-  { label: "Divisa", value: op.divisa },
-  { label: "AWB / BL", value: op.awbBl },
-  { label: "Fecha de arribo", value: op.fechaArribo },
-  { label: "Forwarder", value: op.forwarder },
-  { label: "Factura", value: op.factura },
-  { label: "FOB", value: `${op.divisa} ${op.fob.toLocaleString("es-AR", { minimumFractionDigits: 2 })}` },
-];
-
-const archivosDemo = [
-  { nombre: "Factura_comercial.pdf", tamano: "412 KB" },
-  { nombre: "AWB_original.pdf", tamano: "210 KB" },
-];
+import { ESTADOS } from "@/lib/mock-data";
+import { getOperacion } from "@/lib/data";
+import { UploadCloud } from "lucide-react";
 
 export default async function OperacionDetailPage({
   params,
@@ -33,23 +15,47 @@ export default async function OperacionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const operacion = operaciones.find((o) => o.id === id);
+  const operacion = await getOperacion(id);
   if (!operacion) notFound();
+
+  const campos = [
+    { label: "Cliente", value: operacion.cliente?.nombre ?? "—" },
+    { label: "Exportador", value: operacion.exportador?.nombre ?? "—" },
+    { label: "Origen", value: operacion.pais_origen?.nombre ?? "—" },
+    { label: "Vía", value: operacion.via?.nombre ?? "—" },
+    { label: "Incoterm", value: operacion.incoterm?.nombre ?? "—" },
+    { label: "Divisa", value: operacion.divisa?.nombre ?? "—" },
+    { label: "AWB / BL", value: operacion.awb_bl ?? "—" },
+    { label: "Fecha de arribo", value: operacion.fecha_arribo ?? "—" },
+    { label: "Forwarder", value: operacion.forwarder ?? "—" },
+    { label: "Factura", value: operacion.factura ?? "—" },
+    {
+      label: "FOB",
+      value: `${operacion.divisa?.nombre ?? ""} ${Number(operacion.fob ?? 0).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`,
+    },
+  ];
 
   return (
     <>
-      <AppTopbar title={`Operación ${operacion.orden}`} description={operacion.descripcion} />
+      <AppTopbar
+        title={`Operación ${operacion.orden}`}
+        description={operacion.descripcion ?? undefined}
+      />
       <div className="flex-1 space-y-6 p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Badge variant="outline" className={ESTADOS[operacion.estado].className}>
               {ESTADOS[operacion.estado].label}
             </Badge>
-            <Link href={`/clientes/${operacion.clienteId}`} className="text-sm text-primary hover:underline">
+            <Link href={`/clientes/${operacion.cliente_id}`} className="text-sm text-primary hover:underline">
               Ver perfil del cliente →
             </Link>
           </div>
-          <EstadoSelector estadoActual={operacion.estado} cliente={operacion.cliente} />
+          <EstadoSelector
+            operacionId={operacion.id}
+            estadoActual={operacion.estado}
+            cliente={operacion.cliente?.nombre ?? "el cliente"}
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -59,7 +65,7 @@ export default async function OperacionDetailPage({
             </CardHeader>
             <CardContent>
               <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-                {campos(operacion).map(({ label, value }) => (
+                {campos.map(({ label, value }) => (
                   <div key={label}>
                     <dt className="text-xs text-muted-foreground">{label}</dt>
                     <dd className="text-sm font-medium">{value}</dd>
@@ -75,18 +81,9 @@ export default async function OperacionDetailPage({
               <UploadCloud className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-1">
-              {archivosDemo.map((archivo) => (
-                <div key={archivo.nombre} className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 hover:bg-accent/40">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <FileText className="h-4 w-4 shrink-0 text-primary" />
-                    <div className="min-w-0">
-                      <p className="truncate text-sm">{archivo.nombre}</p>
-                      <p className="text-xs text-muted-foreground">{archivo.tamano}</p>
-                    </div>
-                  </div>
-                  <Download className="h-4 w-4 shrink-0 text-muted-foreground" />
-                </div>
-              ))}
+              <p className="px-2 py-6 text-center text-sm text-muted-foreground">
+                Todavía no se subieron archivos para esta operación.
+              </p>
               <Separator className="my-2" />
               <p className="px-2 text-xs text-muted-foreground">
                 Los archivos subidos acá también quedan visibles en el perfil del cliente.

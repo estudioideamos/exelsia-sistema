@@ -1,15 +1,14 @@
 import { CatalogTable } from "@/components/catalog-table";
+import { createClient } from "@/lib/supabase/server";
 
-const exportadores = [
-  { nombre: "Sigma Aldrich International GmbH", cuit: "ALE/ITA/SUIZ", cod: "101" },
-  { nombre: "Dongshing Diamond Industrial Co. Ltd.", cuit: "COREA", cod: "102" },
-  { nombre: "Katun Corporation", cuit: "USA", cod: "103" },
-  { nombre: "Dellas S.P.A.", cuit: "ITA", cod: "104" },
-  { nombre: "Rotoplas SA de CV", cuit: "MEX", cod: "100" },
-  { nombre: "TG Medical SDN BHD", cuit: "MALASIA", cod: "106" },
-].map((e, i) => ({ id: String(i), ...e }));
+export default async function ExportadoresPage() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("exportadores")
+    .select("id, nombre, cuit, cod")
+    .order("nombre");
+  const exportadores = data ?? [];
 
-export default function ExportadoresPage() {
   return (
     <CatalogTable
       title="Exportadores"

@@ -1,8 +1,11 @@
 import { CatalogTable } from "@/components/catalog-table";
+import { createClient } from "@/lib/supabase/server";
 
-const divisas = ["USD", "EURO", "GBP"].map((nombre, i) => ({ id: String(i), nombre }));
+export default async function DivisasPage() {
+  const supabase = await createClient();
+  const { data } = await supabase.from("divisas").select("id, nombre").order("nombre");
+  const divisas = data ?? [];
 
-export default function DivisasPage() {
   return (
     <CatalogTable
       title="Divisas"

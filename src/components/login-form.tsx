@@ -1,25 +1,39 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
-    // TODO: conectar con Supabase Auth (Etapa 1 conexión backend).
-    await new Promise((resolve) => setTimeout(resolve, 700));
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email"));
+    const password = String(formData.get("password"));
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
     setLoading(false);
-    toast.info("El login todavía no está conectado a una base de datos real.", {
-      description: "Esto se habilita en la próxima etapa, cuando tengamos las claves de Supabase.",
-    });
+
+    if (error) {
+      toast.error("No pudimos iniciar sesión", { description: error.message });
+      return;
+    }
+
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -36,6 +50,7 @@ export function LoginForm() {
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="nombre@exelsia.com.ar"
                 required
@@ -55,6 +70,7 @@ export function LoginForm() {
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="••••••••"
                 required

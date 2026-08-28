@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Mail } from "lucide-react";
+import { Mail, MailWarning } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,29 +11,56 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ESTADOS, type EstadoOperacion } from "@/lib/mock-data";
+import { actualizarEstadoOperacion } from "@/app/(app)/operaciones/[id]/actions";
 
 export function EstadoSelector({
+  operacionId,
   estadoActual,
   cliente,
 }: {
+  operacionId: string;
   estadoActual: EstadoOperacion;
   cliente: string;
 }) {
   const [estado, setEstado] = useState(estadoActual);
+  const [isPending, startTransition] = useTransition();
 
   function handleChange(value: EstadoOperacion | null) {
-    if (!value) return;
-    const nuevo = value;
-    setEstado(nuevo);
-    // TODO: server action -> actualizarEstadoOperacion() + envío de email vía Resend.
-    toast.success(`Estado actualizado a "${ESTADOS[nuevo].label}"`, {
-      description: `Se envió un email a ${cliente} avisando el cambio de estado.`,
-      icon: <Mail className="h-4 w-4" />,
+    if (!value || value === estado) return;
+    const anterior = estado;
+    setEstado(value);
+
+    startTransition(async () => {
+      try {
+        const { emailEnviado, tieneEmailContacto } = await actualizarEstadoOperacion(
+          operacionId,
+          value
+        );
+
+        if (emailEnviado) {
+          toast.success(`Estado actualizado a "${ESTADOS[value].label}"`, {
+            description: `Se envió un email a ${cliente} avisando el cambio de estado.`,
+            icon: <Mail className="h-4 w-4" />,
+          });
+        } else {
+          toast.success(`Estado actualizado a "${ESTADOS[value].label}"`, {
+            description: tieneEmailContacto
+              ? "No se pudo enviar el email (falta configurar Resend)."
+              : "El cliente no tiene un email de contacto cargado.",
+            icon: <MailWarning className="h-4 w-4" />,
+          });
+        }
+      } catch (err) {
+        setEstado(anterior);
+        toast.error("No se pudo actualizar el estado", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      }
     });
   }
 
   return (
-    <Select value={estado} onValueChange={handleChange}>
+    <Select value={estado} onValueChange={handleChange} disabled={isPending}>
       <SelectTrigger className="w-56">
         <SelectValue placeholder="Cambiar estado">
           {(value: EstadoOperacion) => ESTADOS[value]?.label ?? "Cambiar estado"}

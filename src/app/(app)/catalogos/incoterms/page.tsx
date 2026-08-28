@@ -1,10 +1,11 @@
 import { CatalogTable } from "@/components/catalog-table";
+import { createClient } from "@/lib/supabase/server";
 
-const incoterms = ["FOB", "CIF", "EXW", "DAP", "DAT", "CFR", "FCA", "CIP", "CPT", "FAS"].map(
-  (nombre, i) => ({ id: String(i), nombre })
-);
+export default async function IncotermsPage() {
+  const supabase = await createClient();
+  const { data } = await supabase.from("incoterms").select("id, nombre").order("nombre");
+  const incoterms = data ?? [];
 
-export default function IncotermsPage() {
   return (
     <CatalogTable
       title="Incoterms"

@@ -32,35 +32,37 @@ export default function LoginPage() {
       </div>
 
       {/* left branding panel */}
-      <div className="relative z-10 hidden w-1/2 flex-col justify-between p-12 lg:flex">
-        <ExelsiaLogo height={56} />
+      <div className="relative z-10 hidden w-1/2 flex-col p-12 lg:flex">
+        <ExelsiaLogo height={40} />
 
-        <div className="max-w-md space-y-8">
-          <div className="space-y-3">
-            <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              Nueva plataforma de gestión
-            </span>
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground text-balance">
-              Comercio exterior, bajo control.
-            </h1>
-            <p className="text-muted-foreground text-balance">
-              Gestioná operaciones, clientes y documentación de importación y exportación desde
-              un panel moderno, claro y en tiempo real.
-            </p>
-          </div>
+        <div className="flex flex-1 flex-col justify-center">
+          <div className="max-w-md space-y-8">
+            <div className="space-y-4">
+              <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                Nueva plataforma de gestión
+              </span>
+              <h1 className="text-4xl font-semibold tracking-tight text-foreground text-balance">
+                Comercio exterior, bajo control.
+              </h1>
+              <p className="text-muted-foreground text-balance">
+                Gestioná operaciones, clientes y documentación de importación y exportación desde
+                un panel moderno, claro y en tiempo real.
+              </p>
+            </div>
 
-          <div className="space-y-5">
-            {highlights.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-border">
-                  <Icon className="h-4.5 w-4.5 text-primary" />
+            <div className="space-y-5">
+              {highlights.map(({ icon: Icon, title, description }) => (
+                <div key={title} className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-border">
+                    <Icon className="h-4.5 w-4.5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{title}</p>
+                    <p className="text-sm text-muted-foreground">{description}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{title}</p>
-                  <p className="text-sm text-muted-foreground">{description}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
@@ -73,7 +75,7 @@ export default function LoginPage() {
       {/* right login panel */}
       <div className="relative z-10 flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
         <div className="mb-8 lg:hidden">
-          <ExelsiaLogo height={48} />
+          <ExelsiaLogo height={40} />
         </div>
 
         <LoginForm />
