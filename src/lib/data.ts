@@ -94,7 +94,7 @@ export async function getArchivosCliente(clienteId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("archivos_cliente")
-    .select("id, nombre_archivo, storage_path, created_at")
+    .select("id, nombre_archivo, storage_path, created_at, operaciones(id, orden)")
     .eq("cliente_id", clienteId)
     .order("created_at", { ascending: false });
   if (error) throw error;

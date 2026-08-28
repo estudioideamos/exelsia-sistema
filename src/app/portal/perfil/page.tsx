@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppTopbar } from "@/components/app-topbar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchivoDescargaButton } from "@/components/archivo-descarga-button";
 import { Mail, Phone, MapPin, FileText } from "lucide-react";
@@ -88,7 +89,26 @@ export default async function PortalPerfilPage() {
                         <FileText className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{archivo.nombre_archivo}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-medium">{archivo.nombre_archivo}</p>
+                          {(() => {
+                            const op = Array.isArray(archivo.operaciones)
+                              ? archivo.operaciones[0]
+                              : archivo.operaciones;
+                            return (
+                              <Badge
+                                variant="outline"
+                                className={
+                                  op
+                                    ? "shrink-0 border-primary/30 bg-primary/5 text-[10px] text-primary"
+                                    : "shrink-0 text-[10px] text-muted-foreground"
+                                }
+                              >
+                                {op ? op.orden : "General"}
+                              </Badge>
+                            );
+                          })()}
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {new Date(archivo.created_at).toLocaleDateString("es-AR")}
                         </p>

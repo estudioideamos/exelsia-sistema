@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Download, FileText, Loader2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 
 export type ArchivoRow = {
@@ -11,7 +12,12 @@ export type ArchivoRow = {
   nombre_archivo: string;
   storage_path: string;
   created_at: string;
+  operaciones?: { id: string; orden: string } | { id: string; orden: string }[] | null;
 };
+
+function operacionDeArchivo(archivo: ArchivoRow) {
+  return Array.isArray(archivo.operaciones) ? (archivo.operaciones[0] ?? null) : archivo.operaciones ?? null;
+}
 
 export function ArchivosCliente({
   clienteId,
@@ -53,7 +59,7 @@ export function ArchivosCliente({
           storage_path: path,
           subido_por: userData.user?.id,
         })
-        .select("id, nombre_archivo, storage_path, created_at")
+        .select("id, nombre_archivo, storage_path, created_at, operaciones(id, orden)")
         .single();
 
       if (insertError) {
@@ -131,7 +137,21 @@ export function ArchivosCliente({
                   <FileText className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{archivo.nombre_archivo}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-sm font-medium">{archivo.nombre_archivo}</p>
+                    {!operacionId ? (
+                      <Badge
+                        variant="outline"
+                        className={
+                          operacionDeArchivo(archivo)
+                            ? "shrink-0 border-primary/30 bg-primary/5 text-[10px] text-primary"
+                            : "shrink-0 text-[10px] text-muted-foreground"
+                        }
+                      >
+                        {operacionDeArchivo(archivo)?.orden ?? "General"}
+                      </Badge>
+                    ) : null}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     {new Date(archivo.created_at).toLocaleDateString("es-AR")}
                   </p>
