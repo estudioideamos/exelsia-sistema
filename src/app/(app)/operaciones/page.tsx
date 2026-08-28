@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { AppTopbar } from "@/components/app-topbar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -11,9 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { NuevaOperacionDialog } from "@/components/nueva-operacion-dialog";
 import { ESTADOS } from "@/lib/mock-data";
 import { getOperaciones } from "@/lib/data";
-import { Plane, Ship as ShipIcon, Truck, Plus } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { Plane, Ship as ShipIcon, Truck } from "lucide-react";
 
 const viaIcon: Record<string, typeof Plane> = {
   Aéreo: Plane,
@@ -23,7 +24,17 @@ const viaIcon: Record<string, typeof Plane> = {
 };
 
 export default async function OperacionesPage() {
-  const operaciones = await getOperaciones();
+  const supabase = await createClient();
+  const [operaciones, clientesRes, exportadoresRes, paisesRes, viasRes, incotermsRes, divisasRes] =
+    await Promise.all([
+      getOperaciones(),
+      supabase.from("clientes").select("id, nombre").order("nombre"),
+      supabase.from("exportadores").select("id, nombre").order("nombre"),
+      supabase.from("paises").select("id, nombre").order("nombre"),
+      supabase.from("vias").select("id, nombre").order("nombre"),
+      supabase.from("incoterms").select("id, nombre").order("nombre"),
+      supabase.from("divisas").select("id, nombre").order("nombre"),
+    ]);
 
   return (
     <>
@@ -33,10 +44,14 @@ export default async function OperacionesPage() {
       />
       <div className="flex-1 space-y-4 p-6">
         <div className="flex items-center justify-end">
-          <Button size="sm">
-            <Plus className="h-4 w-4" />
-            Nueva operación
-          </Button>
+          <NuevaOperacionDialog
+            clientes={clientesRes.data ?? []}
+            exportadores={exportadoresRes.data ?? []}
+            paises={paisesRes.data ?? []}
+            vias={viasRes.data ?? []}
+            incoterms={incotermsRes.data ?? []}
+            divisas={divisasRes.data ?? []}
+          />
         </div>
 
         <Card className="border-border/60 overflow-hidden py-0">

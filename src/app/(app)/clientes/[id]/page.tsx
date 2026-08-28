@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { AppTopbar } from "@/components/app-topbar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -15,9 +14,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ClientePerfilForm } from "@/components/cliente-perfil-form";
+import { ArchivosCliente } from "@/components/archivos-cliente";
 import { ESTADOS } from "@/lib/mock-data";
-import { getCliente, getOperacionesPorCliente } from "@/lib/data";
-import { UploadCloud } from "lucide-react";
+import { getArchivosCliente, getCliente, getOperacionesPorCliente } from "@/lib/data";
 
 function initials(name: string) {
   return name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -32,7 +31,10 @@ export default async function ClienteDetailPage({
   const cliente = await getCliente(id);
   if (!cliente) notFound();
 
-  const operacionesCliente = await getOperacionesPorCliente(id);
+  const [operacionesCliente, archivosCliente] = await Promise.all([
+    getOperacionesPorCliente(id),
+    getArchivosCliente(id),
+  ]);
 
   return (
     <>
@@ -65,7 +67,7 @@ export default async function ClienteDetailPage({
             <TabsTrigger value="operaciones">
               Operaciones ({operacionesCliente.length})
             </TabsTrigger>
-            <TabsTrigger value="archivos">Archivos</TabsTrigger>
+            <TabsTrigger value="archivos">Archivos ({archivosCliente.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="perfil">
@@ -130,25 +132,11 @@ export default async function ClienteDetailPage({
 
           <TabsContent value="archivos">
             <Card className="border-border/60">
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader>
                 <CardTitle className="text-base">Documentación del cliente</CardTitle>
-                <Button size="sm" variant="outline">
-                  <UploadCloud className="h-4 w-4" />
-                  Subir archivo
-                </Button>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-border/70 px-6 py-8 text-center">
-                  <div className="space-y-1">
-                    <UploadCloud className="mx-auto h-6 w-6 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      Arrastrá archivos acá o hacé click en &quot;Subir archivo&quot;
-                    </p>
-                  </div>
-                </div>
-                <p className="mt-4 text-center text-xs text-muted-foreground">
-                  Todavía no hay archivos subidos para este cliente.
-                </p>
+                <ArchivosCliente clienteId={cliente.id} archivosIniciales={archivosCliente} />
               </CardContent>
             </Card>
           </TabsContent>

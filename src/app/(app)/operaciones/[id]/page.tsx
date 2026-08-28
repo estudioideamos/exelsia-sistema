@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { EstadoSelector } from "@/components/estado-selector";
+import { ArchivosCliente } from "@/components/archivos-cliente";
 import { ESTADOS } from "@/lib/mock-data";
-import { getOperacion } from "@/lib/data";
-import { UploadCloud } from "lucide-react";
+import { getArchivosOperacion, getOperacion } from "@/lib/data";
 
 export default async function OperacionDetailPage({
   params,
@@ -17,6 +17,8 @@ export default async function OperacionDetailPage({
   const { id } = await params;
   const operacion = await getOperacion(id);
   if (!operacion) notFound();
+
+  const archivos = await getArchivosOperacion(id);
 
   const campos = [
     { label: "Cliente", value: operacion.cliente?.nombre ?? "—" },
@@ -76,16 +78,17 @@ export default async function OperacionDetailPage({
           </Card>
 
           <Card className="border-border/60">
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader>
               <CardTitle className="text-base">Archivos</CardTitle>
-              <UploadCloud className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="space-y-1">
-              <p className="px-2 py-6 text-center text-sm text-muted-foreground">
-                Todavía no se subieron archivos para esta operación.
-              </p>
-              <Separator className="my-2" />
-              <p className="px-2 text-xs text-muted-foreground">
+            <CardContent className="space-y-3">
+              <ArchivosCliente
+                clienteId={operacion.cliente_id}
+                operacionId={operacion.id}
+                archivosIniciales={archivos}
+              />
+              <Separator />
+              <p className="px-1 text-xs text-muted-foreground">
                 Los archivos subidos acá también quedan visibles en el perfil del cliente.
               </p>
             </CardContent>

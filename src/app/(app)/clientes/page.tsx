@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { AppTopbar } from "@/components/app-topbar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NuevoClienteDialog } from "@/components/nuevo-cliente-dialog";
 import { getClientes } from "@/lib/data";
-import { Plus, Mail, Phone } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { Mail, Phone } from "lucide-react";
 
 function initials(name: string) {
   return name
@@ -17,17 +18,18 @@ function initials(name: string) {
 }
 
 export default async function ClientesPage() {
-  const clientes = await getClientes();
+  const supabase = await createClient();
+  const [clientes, { data: paises }] = await Promise.all([
+    getClientes(),
+    supabase.from("paises").select("id, nombre").order("nombre"),
+  ]);
 
   return (
     <>
       <AppTopbar title="Clientes" description={`${clientes.length} clientes registrados`} />
       <div className="flex-1 space-y-4 p-6">
         <div className="flex items-center justify-end">
-          <Button size="sm">
-            <Plus className="h-4 w-4" />
-            Nuevo cliente
-          </Button>
+          <NuevoClienteDialog paises={paises ?? []} />
         </div>
 
         {clientes.length === 0 ? (

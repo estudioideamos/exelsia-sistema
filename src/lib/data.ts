@@ -68,6 +68,28 @@ export async function getCliente(id: string) {
   return data;
 }
 
+export async function getArchivosCliente(clienteId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("archivos_cliente")
+    .select("id, nombre_archivo, storage_path, created_at")
+    .eq("cliente_id", clienteId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getArchivosOperacion(operacionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("archivos_cliente")
+    .select("id, nombre_archivo, storage_path, created_at")
+    .eq("operacion_id", operacionId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function getOperacionesPorCliente(clienteId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase

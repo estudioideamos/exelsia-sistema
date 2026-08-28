@@ -1,25 +1,6 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/login-form";
 import { ExelsiaLogo } from "@/components/exelsia-logo";
-import { Ship, ShieldCheck, BellRing, FileStack } from "lucide-react";
-
-const highlights = [
-  {
-    icon: Ship,
-    title: "Seguimiento en tiempo real",
-    description: "Visualizá el estado de cada operación de importación y exportación en un solo lugar.",
-  },
-  {
-    icon: BellRing,
-    title: "Avisos automáticos",
-    description: "Tus clientes reciben un email apenas cambia el estado de su operación.",
-  },
-  {
-    icon: FileStack,
-    title: "Perfil de cliente",
-    description: "Cada cliente tiene su ficha con datos, documentación y archivos propios.",
-  },
-];
 
 export default function LoginPage() {
   return (
@@ -32,43 +13,21 @@ export default function LoginPage() {
       </div>
 
       {/* left branding panel */}
-      <div className="relative z-10 hidden w-1/2 flex-col p-12 lg:flex">
-        <ExelsiaLogo height={40} />
-
-        <div className="flex flex-1 flex-col justify-center">
-          <div className="max-w-md space-y-8">
-            <div className="space-y-4">
-              <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                Nueva plataforma de gestión
-              </span>
-              <h1 className="text-4xl font-semibold tracking-tight text-foreground text-balance">
-                Comercio exterior, bajo control.
-              </h1>
-              <p className="text-muted-foreground text-balance">
-                Gestioná operaciones, clientes y documentación de importación y exportación desde
-                un panel moderno, claro y en tiempo real.
-              </p>
-            </div>
-
-            <div className="space-y-5">
-              {highlights.map(({ icon: Icon, title, description }) => (
-                <div key={title} className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-border">
-                    <Icon className="h-4.5 w-4.5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{title}</p>
-                    <p className="text-sm text-muted-foreground">{description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+      <div className="relative z-10 hidden w-1/2 flex-col items-start justify-center p-16 lg:flex">
+        <div className="max-w-md space-y-6">
+          <ExelsiaLogo height={64} />
+          <div className="space-y-4">
+            <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              Nueva plataforma de gestión
+            </span>
+            <h1 className="text-4xl font-semibold tracking-tight text-foreground text-balance">
+              Comercio exterior, bajo control.
+            </h1>
+            <p className="text-muted-foreground text-balance">
+              Gestioná operaciones, clientes y documentación de importación y exportación desde
+              un panel moderno, claro y en tiempo real.
+            </p>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <ShieldCheck className="h-4 w-4" />
-          Acceso protegido · Exelsia S.R.L.
         </div>
       </div>
 
