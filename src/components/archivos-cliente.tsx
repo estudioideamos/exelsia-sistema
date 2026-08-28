@@ -6,6 +6,7 @@ import { Download, FileText, Loader2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
+import { formatFecha } from "@/lib/utils";
 
 export type ArchivoRow = {
   id: string;
@@ -153,7 +154,7 @@ export function ArchivosCliente({
                     ) : null}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(archivo.created_at).toLocaleDateString("es-AR")}
+                    {formatFecha(archivo.created_at)}
                   </p>
                 </div>
               </div>

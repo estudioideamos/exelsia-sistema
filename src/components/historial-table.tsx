@@ -15,6 +15,7 @@ import { TablePagination, usePagination } from "@/components/table-pagination";
 import { ArrowRight } from "lucide-react";
 import { ESTADOS } from "@/lib/mock-data";
 import type { HistorialRow } from "@/lib/data";
+import { formatFechaHora } from "@/lib/utils";
 
 type Fila = HistorialRow & { changed_by_nombre: string };
 
@@ -45,10 +46,7 @@ export function HistorialTable({ historial }: { historial: Fila[] }) {
               pagination.paginated.map((h) => (
                 <TableRow key={h.id}>
                   <TableCell className="whitespace-nowrap text-muted-foreground">
-                    {new Date(h.changed_at).toLocaleString("es-AR", {
-                      dateStyle: "short",
-                      timeStyle: "short",
-                    })}
+                    {formatFechaHora(h.changed_at)}
                   </TableCell>
                   <TableCell>
                     {h.operacion ? (

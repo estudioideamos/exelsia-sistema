@@ -6,6 +6,7 @@ import { FileText } from "lucide-react";
 import { ArchivoDescargaButton } from "@/components/archivo-descarga-button";
 import { ESTADOS } from "@/lib/mock-data";
 import { getArchivosOperacion, getOperacion, getPerfilActual } from "@/lib/data";
+import { formatFecha } from "@/lib/utils";
 
 export default async function PortalOperacionDetailPage({
   params,
@@ -27,7 +28,7 @@ export default async function PortalOperacionDetailPage({
     { label: "Vía", value: operacion.via?.nombre ?? "—" },
     { label: "Incoterm", value: operacion.incoterm?.nombre ?? "—" },
     { label: "AWB / BL", value: operacion.awb_bl ?? "—" },
-    { label: "Fecha de arribo", value: operacion.fecha_arribo ?? "—" },
+    { label: "Fecha de arribo", value: formatFecha(operacion.fecha_arribo) },
     { label: "Forwarder", value: operacion.forwarder ?? "—" },
     { label: "Factura", value: operacion.factura ?? "—" },
     {

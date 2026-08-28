@@ -17,6 +17,7 @@ import { ClientePerfilForm } from "@/components/cliente-perfil-form";
 import { ArchivosCliente } from "@/components/archivos-cliente";
 import { ESTADOS } from "@/lib/mock-data";
 import { getArchivosCliente, getCliente, getOperacionesPorCliente } from "@/lib/data";
+import { formatFecha } from "@/lib/utils";
 
 function initials(name: string) {
   return name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -112,7 +113,7 @@ export default async function ClienteDetailPage({
                           </TableCell>
                           <TableCell className="text-muted-foreground">{op.exportador?.nombre ?? "—"}</TableCell>
                           <TableCell className="text-muted-foreground">{op.pais_origen?.nombre ?? "—"}</TableCell>
-                          <TableCell className="text-muted-foreground">{op.fecha_arribo ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{formatFecha(op.fecha_arribo)}</TableCell>
                           <TableCell className="text-right tabular-nums">
                             {op.divisa?.nombre} {Number(op.fob ?? 0).toLocaleString("es-AR", { minimumFractionDigits: 2 })}
                           </TableCell>

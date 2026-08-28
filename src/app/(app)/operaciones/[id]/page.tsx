@@ -8,8 +8,11 @@ import { Separator } from "@/components/ui/separator";
 import { EstadoSelector } from "@/components/estado-selector";
 import { ArchivosCliente } from "@/components/archivos-cliente";
 import { OperacionDialog } from "@/components/operacion-dialog";
+import { OperacionTimeline } from "@/components/operacion-timeline";
+import { NotasInternas } from "@/components/notas-internas";
 import { ESTADOS } from "@/lib/mock-data";
-import { getArchivosOperacion, getOperacion } from "@/lib/data";
+import { getArchivosOperacion, getOperacion, getHistorialOperacion } from "@/lib/data";
+import { formatFecha } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 import { Pencil } from "lucide-react";
 
@@ -20,10 +23,11 @@ export default async function OperacionDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const [operacion, archivos, clientesRes, exportadoresRes, paisesRes, viasRes, incotermsRes, divisasRes] =
+  const [operacion, archivos, historial, clientesRes, exportadoresRes, paisesRes, viasRes, incotermsRes, divisasRes] =
     await Promise.all([
       getOperacion(id),
       getArchivosOperacion(id),
+      getHistorialOperacion(id),
       supabase.from("clientes").select("id, nombre").order("nombre"),
       supabase.from("exportadores").select("id, nombre").order("nombre"),
       supabase.from("paises").select("id, nombre").order("nombre"),
@@ -41,7 +45,7 @@ export default async function OperacionDetailPage({
     { label: "Incoterm", value: operacion.incoterm?.nombre ?? "—" },
     { label: "Divisa", value: operacion.divisa?.nombre ?? "—" },
     { label: "AWB / BL", value: operacion.awb_bl ?? "—" },
-    { label: "Fecha de arribo", value: operacion.fecha_arribo ?? "—" },
+    { label: "Fecha de arribo", value: formatFecha(operacion.fecha_arribo) },
     { label: "Forwarder", value: operacion.forwarder ?? "—" },
     { label: "Factura", value: operacion.factura ?? "—" },
     {
@@ -136,6 +140,26 @@ export default async function OperacionDetailPage({
               <p className="px-1 text-xs text-muted-foreground">
                 Los archivos subidos acá también quedan visibles en el perfil del cliente.
               </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <Card className="border-border/60 xl:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-base">Historial</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OperacionTimeline eventos={historial} creadaEn={operacion.created_at} />
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/60">
+            <CardHeader>
+              <CardTitle className="text-base">Notas internas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <NotasInternas operacionId={operacion.id} notasIniciales={operacion.comentarios} />
             </CardContent>
           </Card>
         </div>

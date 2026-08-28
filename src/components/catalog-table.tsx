@@ -42,6 +42,7 @@ import {
   eliminarItemCatalogo,
 } from "@/app/(app)/catalogos/actions";
 import { TablePagination, usePagination } from "@/components/table-pagination";
+import { useSort, SortableTableHead } from "@/components/sortable-header";
 
 export type CatalogColumn<T> = {
   key: keyof T;
@@ -115,7 +116,12 @@ export function CatalogTable<T extends Row>({
   const [addOpen, setAddOpen] = useState(false);
   const [editRow, setEditRow] = useState<T | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const pagination = usePagination(rows);
+
+  const sortAccessors = Object.fromEntries(
+    columns.map((col) => [String(col.key), (row: T) => (row[col.key] as string | number | null) ?? null])
+  );
+  const { sorted, sortKey, sortDir, toggleSort } = useSort(rows, sortAccessors);
+  const pagination = usePagination(sorted);
 
   async function handleCreate(datos: Record<string, string>) {
     try {
@@ -186,9 +192,15 @@ export function CatalogTable<T extends Row>({
               <TableHeader>
                 <TableRow className="bg-muted/40 hover:bg-muted/40">
                   {columns.map((col) => (
-                    <TableHead key={String(col.key)} className={col.className}>
-                      {col.label}
-                    </TableHead>
+                    <SortableTableHead
+                      key={String(col.key)}
+                      label={col.label}
+                      sortKey={String(col.key)}
+                      activeKey={sortKey}
+                      dir={sortDir}
+                      onSort={toggleSort}
+                      className={col.className}
+                    />
                   ))}
                   <TableHead className="w-20 text-right">Acciones</TableHead>
                 </TableRow>

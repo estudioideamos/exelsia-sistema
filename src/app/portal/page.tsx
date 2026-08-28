@@ -13,6 +13,7 @@ import {
 import { EstadoDistributionChart } from "@/components/estado-distribution-chart";
 import { ESTADOS } from "@/lib/mock-data";
 import { getOperacionesPorCliente, getPerfilActual } from "@/lib/data";
+import { formatFecha } from "@/lib/utils";
 import { Plane, Ship as ShipIcon, Truck, Package, Clock } from "lucide-react";
 
 const viaIcon: Record<string, typeof Plane> = {
@@ -124,7 +125,7 @@ export default async function PortalHomePage() {
                             </span>
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {op.fecha_arribo ?? "—"}
+                            {formatFecha(op.fecha_arribo)}
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className={ESTADOS[op.estado].className}>

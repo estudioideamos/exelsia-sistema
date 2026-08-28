@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchivoDescargaButton } from "@/components/archivo-descarga-button";
 import { Mail, Phone, MapPin, FileText } from "lucide-react";
 import { getArchivosCliente, getCliente, getPerfilActual } from "@/lib/data";
+import { formatFecha } from "@/lib/utils";
 
 function initials(name: string) {
   return name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -110,7 +111,7 @@ export default async function PortalPerfilPage() {
                           })()}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(archivo.created_at).toLocaleDateString("es-AR")}
+                          {formatFecha(archivo.created_at)}
                         </p>
                       </div>
                     </div>

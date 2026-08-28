@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { formatFecha } from "@/lib/utils";
 
 export type ColumnaExport = { label: string; key: string };
 
@@ -82,7 +83,7 @@ export function imprimirSeleccionados(
     <img src="https://exelsia-sistema.vercel.app/exelsia-logo.png" alt="Exelsia" />
   </div>
   <h1>${titulo}</h1>
-  <p class="meta">${filas.length} registro(s) · ${new Date().toLocaleDateString("es-AR")}</p>
+  <p class="meta">${filas.length} registro(s) · ${formatFecha(new Date().toISOString())}</p>
   <table>
     <thead><tr>${columnas.map((c) => `<th>${c.label}</th>`).join("")}</tr></thead>
     <tbody>${filasHtml}</tbody>

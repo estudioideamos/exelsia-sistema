@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/table";
 import { ExportMenu } from "@/components/export-menu";
 import { TablePagination, usePagination } from "@/components/table-pagination";
+import { useSort, SortableTableHead } from "@/components/sortable-header";
 import { ESTADOS } from "@/lib/mock-data";
 import type { OperacionRow } from "@/lib/data";
+import { formatFecha } from "@/lib/utils";
 import { Plane, Ship as ShipIcon, Truck } from "lucide-react";
 
 const viaIcon: Record<string, typeof Plane> = {
@@ -38,9 +40,21 @@ const COLUMNAS_EXPORT = [
   { label: "Estado", key: "estado" },
 ];
 
+const SORT_ACCESSORS: Record<string, (op: OperacionRow) => string | number | null> = {
+  orden: (op) => op.orden,
+  cliente: (op) => op.cliente?.nombre ?? null,
+  exportador: (op) => op.exportador?.nombre ?? null,
+  origen: (op) => op.pais_origen?.nombre ?? null,
+  via: (op) => op.via?.nombre ?? null,
+  fecha_arribo: (op) => op.fecha_arribo,
+  fob: (op) => op.fob,
+  estado: (op) => ESTADOS[op.estado]?.label ?? op.estado,
+};
+
 export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] }) {
   const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set());
-  const pagination = usePagination(operaciones);
+  const { sorted, sortKey, sortDir, toggleSort } = useSort(operaciones, SORT_ACCESSORS);
+  const pagination = usePagination(sorted);
 
   const todasSeleccionadas = operaciones.length > 0 && seleccionadas.size === operaciones.length;
 
@@ -58,7 +72,7 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
   }
 
   const filasExport = useMemo(() => {
-    const base = seleccionadas.size > 0 ? operaciones.filter((o) => seleccionadas.has(o.id)) : operaciones;
+    const base = seleccionadas.size > 0 ? sorted.filter((o) => seleccionadas.has(o.id)) : sorted;
     return base.map((op) => ({
       orden: op.orden,
       cliente: op.cliente?.nombre ?? "",
@@ -66,11 +80,11 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
       origen: op.pais_origen?.nombre ?? "",
       via: op.via?.nombre ?? "",
       awb_bl: op.awb_bl ?? "",
-      fecha_arribo: op.fecha_arribo ?? "",
+      fecha_arribo: formatFecha(op.fecha_arribo),
       fob: op.fob ?? "",
       estado: ESTADOS[op.estado]?.label ?? op.estado,
     }));
-  }, [operaciones, seleccionadas]);
+  }, [sorted, seleccionadas]);
 
   return (
     <div className="space-y-3">
@@ -98,15 +112,15 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
                 <TableHead className="w-10">
                   <Checkbox checked={todasSeleccionadas} onCheckedChange={toggleTodas} />
                 </TableHead>
-                <TableHead>Orden</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Exportador</TableHead>
-                <TableHead>Origen</TableHead>
-                <TableHead>Vía</TableHead>
+                <SortableTableHead label="Orden" sortKey="orden" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+                <SortableTableHead label="Cliente" sortKey="cliente" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+                <SortableTableHead label="Exportador" sortKey="exportador" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+                <SortableTableHead label="Origen" sortKey="origen" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+                <SortableTableHead label="Vía" sortKey="via" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
                 <TableHead>AWB / BL</TableHead>
-                <TableHead>Arribo</TableHead>
-                <TableHead className="text-right">FOB</TableHead>
-                <TableHead>Estado</TableHead>
+                <SortableTableHead label="Arribo" sortKey="fecha_arribo" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+                <SortableTableHead label="FOB" sortKey="fob" activeKey={sortKey} dir={sortDir} onSort={toggleSort} className="text-right" />
+                <SortableTableHead label="Estado" sortKey="estado" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -158,7 +172,7 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {op.awb_bl ?? "—"}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{op.fecha_arribo ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{formatFecha(op.fecha_arribo)}</TableCell>
                       <TableCell className="text-right tabular-nums">
                         {op.divisa?.nombre}{" "}
                         {Number(op.fob ?? 0).toLocaleString("es-AR", { minimumFractionDigits: 2 })}

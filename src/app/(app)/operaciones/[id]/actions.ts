@@ -75,3 +75,13 @@ export async function actualizarEstadoOperacion(operacionId: string, nuevoEstado
 
   return { emailEnviado, tieneEmailContacto: Boolean(cliente?.email_contacto) };
 }
+
+export async function guardarNotasInternas(operacionId: string, comentarios: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("operaciones")
+    .update({ comentarios: comentarios.trim() || null })
+    .eq("id", operacionId);
+  if (error) throw error;
+  revalidatePath(`/operaciones/${operacionId}`);
+}

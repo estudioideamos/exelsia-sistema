@@ -33,6 +33,9 @@ export type OperacionRow = {
   fob: number | null;
   estado: EstadoOperacion;
   descripcion: string | null;
+  comentarios: string | null;
+  created_at: string;
+  updated_at: string;
   divisa: { nombre: string } | null;
   incoterm: { nombre: string } | null;
   via: { nombre: string } | null;
@@ -43,7 +46,8 @@ export type OperacionRow = {
 
 const OPERACION_SELECT = `
   id, orden, cliente_id, exportador_id, pais_origen_id, via_id, incoterm_id, divisa_id,
-  awb_bl, fecha_arribo, forwarder, factura, fob, estado, descripcion,
+  awb_bl, fecha_arribo, forwarder, factura, fob, estado, descripcion, comentarios,
+  created_at, updated_at,
   divisa:divisas(nombre),
   incoterm:incoterms(nombre),
   via:vias(nombre),
@@ -202,38 +206,3 @@ export async function getHistorialOperacion(operacionId: string) {
   })) as (typeof filas[number] & { changed_by_nombre: string })[];
 }
 
-export type NotaOperacion = {
-  id: string;
-  texto: string;
-  created_at: string;
-  autor_id: string;
-  autor_nombre: string;
-};
-
-export async function getNotasOperacion(operacionId: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("operacion_notas")
-    .select("id, texto, created_at, autor_id")
-    .eq("operacion_id", operacionId)
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-
-  const filas = data ?? [];
-  const autorIds = [...new Set(filas.map((f) => f.autor_id))];
-  const nombrePorAutorId = new Map<string, string>();
-  if (autorIds.length) {
-    const { data: perfiles } = await supabase
-      .from("profiles")
-      .select("id, nombre")
-      .in("id", autorIds);
-    for (const p of perfiles ?? []) {
-      if (p.nombre) nombrePorAutorId.set(p.id, p.nombre);
-    }
-  }
-
-  return filas.map((f) => ({
-    ...f,
-    autor_nombre: nombrePorAutorId.get(f.autor_id) ?? "Usuario",
-  })) as NotaOperacion[];
-}
