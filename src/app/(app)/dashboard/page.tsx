@@ -3,6 +3,7 @@ import { AppTopbar } from "@/components/app-topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EstadoDistributionChart } from "@/components/estado-distribution-chart";
 import { ESTADOS } from "@/lib/mock-data";
 import { getClientes, getOperaciones } from "@/lib/data";
 import { ArrowUpRight, Package, Ship, Users, Clock } from "lucide-react";
@@ -53,15 +54,19 @@ export default async function DashboardPage() {
       <AppTopbar title="Dashboard" description="Resumen general de la operatoria" />
       <div className="flex-1 space-y-6 p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {kpis.map(({ label, value, icon: Icon, hint }) => (
-            <Card key={label} className="border-border/60">
+          {kpis.map(({ label, value, icon: Icon, hint }, i) => (
+            <Card
+              key={label}
+              className="animate-fade-in-up border-border/60 transition-transform hover:-translate-y-0.5"
+              style={{ "--stagger": i } as React.CSSProperties}
+            >
               <CardContent className="flex items-start justify-between pt-6">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">{label}</p>
                   <p className="text-2xl font-semibold tracking-tight">{value}</p>
                   <p className="text-xs text-muted-foreground">{hint}</p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="animate-glow-pulse flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
                 </div>
               </CardContent>
@@ -70,7 +75,10 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <Card className="border-border/60 xl:col-span-2">
+          <Card
+            className="animate-fade-in-up border-border/60 xl:col-span-2"
+            style={{ "--stagger": 4 } as React.CSSProperties}
+          >
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">Operaciones recientes</CardTitle>
               <Button
@@ -113,32 +121,46 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/60">
-            <CardHeader>
-              <CardTitle className="text-base">Clientes con más actividad</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {clientesConActividad.length === 0 ? (
-                <p className="py-10 text-center text-sm text-muted-foreground">
-                  Todavía no hay clientes cargados.
-                </p>
-              ) : (
-                clientesConActividad.map((cliente) => (
-                  <Link
-                    key={cliente.id}
-                    href={`/clientes/${cliente.id}`}
-                    className="flex items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-accent/50"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{cliente.nombre}</p>
-                      <p className="text-xs text-muted-foreground">CUIT {cliente.cuit ?? "—"}</p>
-                    </div>
-                    <Badge variant="secondary">{cliente.operacionesActivas} activas</Badge>
-                  </Link>
-                ))
-              )}
-            </CardContent>
-          </Card>
+          <div
+            className="animate-fade-in-up space-y-6"
+            style={{ "--stagger": 5 } as React.CSSProperties}
+          >
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle className="text-base">Operaciones por estado</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EstadoDistributionChart estados={operaciones.map((o) => o.estado)} />
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle className="text-base">Clientes con más actividad</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {clientesConActividad.length === 0 ? (
+                  <p className="py-10 text-center text-sm text-muted-foreground">
+                    Todavía no hay clientes cargados.
+                  </p>
+                ) : (
+                  clientesConActividad.map((cliente) => (
+                    <Link
+                      key={cliente.id}
+                      href={`/clientes/${cliente.id}`}
+                      className="flex items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-accent/50"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{cliente.nombre}</p>
+                        <p className="text-xs text-muted-foreground">CUIT {cliente.cuit ?? "—"}</p>
+                      </div>
+                      <Badge variant="secondary">{cliente.operacionesActivas} activas</Badge>
+                    </Link>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </>

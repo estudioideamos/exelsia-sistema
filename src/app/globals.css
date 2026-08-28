@@ -136,6 +136,42 @@
   }
 }
 
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 35%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in oklch, var(--primary) 0%, transparent); }
+}
+
+@keyframes count-bar {
+  0% { width: 0%; }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--stagger, 0) * 60ms);
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2.4s ease-in-out infinite;
+}
+
+.animate-count-bar {
+  animation: count-bar 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--stagger, 0) * 80ms + 150ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-glow-pulse,
+  .animate-count-bar {
+    animation: none;
+  }
+}
+
 @keyframes drift-a {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(4%, 6%) scale(1.08); }
