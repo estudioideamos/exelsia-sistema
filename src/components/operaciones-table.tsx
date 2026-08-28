@@ -108,6 +108,15 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
       </div>
 
       <Card className="border-border/60 overflow-hidden py-0">
+        <TablePagination
+          position="top"
+          page={pagination.page}
+          setPage={pagination.setPage}
+          pageSize={pagination.pageSize}
+          setPageSize={pagination.setPageSize}
+          pageCount={pagination.pageCount}
+          total={pagination.total}
+        />
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

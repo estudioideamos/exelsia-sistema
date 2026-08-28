@@ -11,8 +11,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EstadoDistributionChart } from "@/components/estado-distribution-chart";
+import { EstadoCuentaButton } from "@/components/estado-cuenta-button";
 import { ESTADOS } from "@/lib/mock-data";
-import { getOperacionesPorCliente, getPerfilActual } from "@/lib/data";
+import { getCliente, getOperacionesPorCliente, getPerfilActual } from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
 import { Plane, Ship as ShipIcon, Truck, Package, Clock } from "lucide-react";
 
@@ -25,9 +26,10 @@ const viaIcon: Record<string, typeof Plane> = {
 
 export default async function PortalHomePage() {
   const { profile } = await getPerfilActual();
-  const operaciones = profile?.cliente_id
-    ? await getOperacionesPorCliente(profile.cliente_id)
-    : [];
+  const [operaciones, cliente] = await Promise.all([
+    profile?.cliente_id ? getOperacionesPorCliente(profile.cliente_id) : Promise.resolve([]),
+    profile?.cliente_id ? getCliente(profile.cliente_id) : Promise.resolve(null),
+  ]);
 
   const enCurso = operaciones.filter((o) => o.estado !== "completada").length;
   const pendientes = operaciones.filter(
@@ -53,7 +55,21 @@ export default async function PortalHomePage() {
         description="Seguimiento en tiempo real de tus envíos"
         notificationsBasePath="/portal/operaciones"
         includeClientesInSearch={false}
-      />
+      >
+        <EstadoCuentaButton
+          clienteNombre={cliente?.nombre ?? "Cliente"}
+          operaciones={operaciones.map((op) => ({
+            orden: op.orden,
+            exportador: op.exportador?.nombre ?? "—",
+            origen: op.pais_origen?.nombre ?? "—",
+            via: op.via?.nombre ?? "—",
+            fecha_arribo: op.fecha_arribo,
+            divisa: op.divisa?.nombre ?? "",
+            fob: op.fob,
+            estado: op.estado,
+          }))}
+        />
+      </AppTopbar>
       <div className="flex-1 space-y-6 p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {kpis.map(({ label, value, icon: Icon }, i) => (

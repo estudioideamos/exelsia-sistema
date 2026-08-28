@@ -83,6 +83,18 @@ export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
         />
       </div>
 
+      <div className="rounded-lg border border-border/60">
+        <TablePagination
+          position="top"
+          page={pagination.page}
+          setPage={pagination.setPage}
+          pageSize={pagination.pageSize}
+          setPageSize={pagination.setPageSize}
+          pageCount={pagination.pageCount}
+          total={pagination.total}
+        />
+      </div>
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {pagination.paginated.map((cliente) => {
           const operacionesActivas = Array.isArray(cliente.operaciones)

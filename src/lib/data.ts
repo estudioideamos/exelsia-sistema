@@ -234,3 +234,45 @@ export async function getHistorialOperacion(operacionId: string) {
   })) as (typeof filas[number] & { changed_by_nombre: string })[];
 }
 
+export type MensajeOperacion = {
+  id: string;
+  operacion_id: string;
+  autor_id: string;
+  texto: string;
+  created_at: string;
+  autor_nombre: string;
+  autor_rol: "admin" | "cliente";
+};
+
+export async function getMensajesOperacion(operacionId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("operacion_mensajes")
+    .select("id, operacion_id, autor_id, texto, created_at")
+    .eq("operacion_id", operacionId)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+
+  const filas = data ?? [];
+  const autorIds = [...new Set(filas.map((f) => f.autor_id))];
+  const perfilesPorId = new Map<string, { nombre: string | null; role: "admin" | "cliente" }>();
+  if (autorIds.length) {
+    const { data: perfiles } = await supabase
+      .from("profiles")
+      .select("id, nombre, role")
+      .in("id", autorIds);
+    for (const p of perfiles ?? []) {
+      perfilesPorId.set(p.id, { nombre: p.nombre, role: p.role });
+    }
+  }
+
+  return filas.map((f) => {
+    const perfil = perfilesPorId.get(f.autor_id);
+    return {
+      ...f,
+      autor_nombre: perfil?.nombre ?? (perfil?.role === "admin" ? "Exelsia" : "Cliente"),
+      autor_rol: perfil?.role ?? "cliente",
+    };
+  }) as MensajeOperacion[];
+}
+

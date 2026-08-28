@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const OPCIONES_TAMANO = [10, 20, 30, 50, 100];
 
@@ -43,6 +44,7 @@ export function TablePagination({
   setPageSize,
   pageCount,
   total,
+  position = "bottom",
 }: {
   page: number;
   setPage: (page: number) => void;
@@ -50,6 +52,7 @@ export function TablePagination({
   setPageSize: (size: number) => void;
   pageCount: number;
   total: number;
+  position?: "top" | "bottom";
 }) {
   if (total === 0) return null;
 
@@ -57,7 +60,12 @@ export function TablePagination({
   const end = pageSize === -1 ? total : Math.min(page * pageSize, total);
 
   return (
-    <div className="flex flex-col gap-3 border-t border-border/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div
+      className={cn(
+        "flex flex-col gap-3 border-border/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between",
+        position === "top" ? "border-b" : "border-t"
+      )}
+    >
       <p className="text-xs text-muted-foreground">
         Mostrando {start}–{end} de {total}
       </p>

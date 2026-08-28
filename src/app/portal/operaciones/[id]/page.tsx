@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText } from "lucide-react";
 import { ArchivoDescargaButton } from "@/components/archivo-descarga-button";
+import { OperacionMensajes } from "@/components/operacion-mensajes";
 import { ESTADOS } from "@/lib/mock-data";
-import { getArchivosOperacion, getOperacion, getPerfilActual } from "@/lib/data";
+import { getArchivosOperacion, getOperacion, getPerfilActual, getMensajesOperacion } from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
 
 export default async function PortalOperacionDetailPage({
@@ -14,13 +15,16 @@ export default async function PortalOperacionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { profile } = await getPerfilActual();
+  const { user, profile } = await getPerfilActual();
   if (!profile?.cliente_id) redirect("/login");
 
   const operacion = await getOperacion(id);
   if (!operacion || operacion.cliente_id !== profile.cliente_id) notFound();
 
-  const archivos = await getArchivosOperacion(id);
+  const [archivos, mensajes] = await Promise.all([
+    getArchivosOperacion(id),
+    getMensajesOperacion(id),
+  ]);
 
   const campos = [
     { label: "Exportador", value: operacion.exportador?.nombre ?? "—" },
@@ -94,6 +98,20 @@ export default async function PortalOperacionDetailPage({
             </CardContent>
           </Card>
         </div>
+
+        <Card className="border-border/60">
+          <CardHeader>
+            <CardTitle className="text-base">Preguntas y comentarios</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <OperacionMensajes
+              operacionId={operacion.id}
+              mensajesIniciales={mensajes}
+              usuarioActualId={user?.id ?? ""}
+              pathARevalidar={`/portal/operaciones/${operacion.id}`}
+            />
+          </CardContent>
+        </Card>
       </div>
     </>
   );

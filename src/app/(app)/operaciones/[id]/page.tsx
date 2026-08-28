@@ -10,8 +10,9 @@ import { ArchivosCliente } from "@/components/archivos-cliente";
 import { OperacionDialog } from "@/components/operacion-dialog";
 import { OperacionTimeline } from "@/components/operacion-timeline";
 import { NotasInternas } from "@/components/notas-internas";
+import { OperacionMensajes } from "@/components/operacion-mensajes";
 import { ESTADOS } from "@/lib/mock-data";
-import { getArchivosOperacion, getOperacion, getHistorialOperacion } from "@/lib/data";
+import { getArchivosOperacion, getOperacion, getHistorialOperacion, getMensajesOperacion } from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 import { Pencil } from "lucide-react";
@@ -23,11 +24,15 @@ export default async function OperacionDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const [operacion, archivos, historial, clientesRes, exportadoresRes, paisesRes, viasRes, incotermsRes, divisasRes] =
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const [operacion, archivos, historial, mensajes, clientesRes, exportadoresRes, paisesRes, viasRes, incotermsRes, divisasRes] =
     await Promise.all([
       getOperacion(id),
       getArchivosOperacion(id),
       getHistorialOperacion(id),
+      getMensajesOperacion(id),
       supabase.from("clientes").select("id, nombre").order("nombre"),
       supabase.from("exportadores").select("id, nombre").order("nombre"),
       supabase.from("paises").select("id, nombre").order("nombre"),
@@ -246,6 +251,20 @@ export default async function OperacionDetailPage({
             </CardContent>
           </Card>
         </div>
+
+        <Card className="border-border/60">
+          <CardHeader>
+            <CardTitle className="text-base">Mensajes con el cliente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <OperacionMensajes
+              operacionId={operacion.id}
+              mensajesIniciales={mensajes}
+              usuarioActualId={user?.id ?? ""}
+              pathARevalidar={`/operaciones/${operacion.id}`}
+            />
+          </CardContent>
+        </Card>
       </div>
     </>
   );
