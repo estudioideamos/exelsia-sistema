@@ -4,9 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EstadoDistributionChart } from "@/components/estado-distribution-chart";
-import { ESTADOS } from "@/lib/mock-data";
+import { DashboardExportButton } from "@/components/dashboard-export-button";
+import { ESTADOS, type EstadoOperacion } from "@/lib/mock-data";
 import { getClientes, getOperaciones } from "@/lib/data";
 import { ArrowUpRight, Package, Ship, Users, Clock } from "lucide-react";
+
+const ORDEN_ESTADOS: EstadoOperacion[] = [
+  "en_curso",
+  "oficializada",
+  "despachada",
+  "mafia_solicitado",
+  "depositada",
+  "completada",
+];
 
 export default async function DashboardPage() {
   const [operaciones, clientes] = await Promise.all([getOperaciones(), getClientes()]);
@@ -49,9 +59,36 @@ export default async function DashboardPage() {
     .sort((a, b) => b.operacionesActivas - a.operacionesActivas)
     .slice(0, 5);
 
+  const totalOps = operaciones.length;
+  const estadoDistribucion = ORDEN_ESTADOS.map((estado) => {
+    const cantidad = operaciones.filter((o) => o.estado === estado).length;
+    return {
+      label: ESTADOS[estado].label,
+      cantidad,
+      porcentaje: totalOps ? Math.round((cantidad / totalOps) * 100) : 0,
+    };
+  }).filter((e) => e.cantidad > 0);
+
+  const reporteData = {
+    kpis: kpis.map(({ label, value, hint }) => ({ label, value: String(value), hint })),
+    estadoDistribucion,
+    clientesConActividad: clientesConActividad.map((c) => ({
+      nombre: c.nombre,
+      cuit: c.cuit ?? "—",
+      operacionesActivas: c.operacionesActivas,
+    })),
+    operacionesRecientes: recientes.map((op) => ({
+      orden: op.orden,
+      cliente: op.cliente?.nombre ?? "—",
+      estado: ESTADOS[op.estado].label,
+    })),
+  };
+
   return (
     <>
-      <AppTopbar title="Dashboard" description="Resumen general de la operatoria" />
+      <AppTopbar title="Dashboard" description="Resumen general de la operatoria">
+        <DashboardExportButton data={reporteData} />
+      </AppTopbar>
       <div className="flex-1 space-y-6 p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {kpis.map(({ label, value, icon: Icon, hint }, i) => (

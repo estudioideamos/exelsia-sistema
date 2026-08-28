@@ -7,11 +7,13 @@ export function AppTopbar({
   description,
   notificationsBasePath = "/operaciones",
   includeClientesInSearch = true,
+  children,
 }: {
   title: string;
   description?: string;
   notificationsBasePath?: string;
   includeClientesInSearch?: boolean;
+  children?: React.ReactNode;
 }) {
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-border/60 bg-background/80 px-6 py-4 backdrop-blur-xl">
@@ -22,6 +24,7 @@ export function AppTopbar({
         ) : null}
       </div>
       <div className="flex items-center gap-3">
+        {children}
         <GlobalSearch
           operacionesBasePath={notificationsBasePath}
           includeClientes={includeClientesInSearch}
