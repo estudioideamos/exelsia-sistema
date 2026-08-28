@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const OPCIONES_TAMANO = [10, 20, 30, 50, 100];
 
-export function usePagination<T>(items: T[], initialPageSize = 20) {
+export function usePagination<T>(items: T[], initialPageSize = 100) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSizeState] = useState(initialPageSize);
 

@@ -36,6 +36,36 @@ export type OperacionRow = {
   comentarios: string | null;
   created_at: string;
   updated_at: string;
+  peso_kg: number | null;
+  fecha_factura: string | null;
+  orden_compra: string | null;
+  oficializacion_dua: string | null;
+  tc: number | null;
+  gastos_fob: number | null;
+  flete: number | null;
+  seguro: number | null;
+  base_imponible: number | null;
+  intervinientes: string | null;
+  fecha_oficializacion: string | null;
+  fecha_despacho: string | null;
+  fecha_orden?: string | null;
+  envio_terminal?: string | null;
+  ncm?: string | null;
+  numero_oficializacion?: string | null;
+  anticipo_solicitado?: number | null;
+  fecha_anticipo?: string | null;
+  anticipo_depositado?: number | null;
+  pendiente?: number | null;
+  fecha_deposito_anticipo?: string | null;
+  mafia_solicitado?: number | null;
+  fecha_mafia_deposito?: string | null;
+  mafia_depositado?: number | null;
+  fecha_deposito_mafia?: string | null;
+  despacho?: string | null;
+  facturas_exelsia?: string | null;
+  fecha_factura_exelsia?: string | null;
+  fecha_entrega?: string | null;
+  ajuste?: number | null;
   divisa: { nombre: string } | null;
   incoterm: { nombre: string } | null;
   via: { nombre: string } | null;
@@ -45,9 +75,7 @@ export type OperacionRow = {
 };
 
 const OPERACION_SELECT = `
-  id, orden, cliente_id, exportador_id, pais_origen_id, via_id, incoterm_id, divisa_id,
-  awb_bl, fecha_arribo, forwarder, factura, fob, estado, descripcion, comentarios,
-  created_at, updated_at,
+  *,
   divisa:divisas(nombre),
   incoterm:incoterms(nombre),
   via:vias(nombre),

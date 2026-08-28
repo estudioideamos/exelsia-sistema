@@ -36,7 +36,7 @@ const COLUMNAS_EXPORT = [
 
 export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
-  const pagination = usePagination(clientes, 30);
+  const pagination = usePagination(clientes);
 
   function toggle(id: string) {
     setSeleccionados((prev) => {

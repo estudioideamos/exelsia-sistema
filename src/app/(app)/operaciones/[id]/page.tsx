@@ -37,22 +37,76 @@ export default async function OperacionDetailPage({
     ]);
   if (!operacion) notFound();
 
-  const campos = [
+  const numeroFmt = (n: number | null | undefined) =>
+    n == null ? "—" : n.toLocaleString("es-AR", { minimumFractionDigits: 2 });
+
+  const camposGeneral = [
     { label: "Cliente", value: operacion.cliente?.nombre ?? "—" },
+    { label: "Fecha", value: formatFecha(operacion.fecha_orden) },
     { label: "Exportador", value: operacion.exportador?.nombre ?? "—" },
     { label: "Origen", value: operacion.pais_origen?.nombre ?? "—" },
     { label: "Vía", value: operacion.via?.nombre ?? "—" },
-    { label: "Incoterm", value: operacion.incoterm?.nombre ?? "—" },
-    { label: "Divisa", value: operacion.divisa?.nombre ?? "—" },
     { label: "AWB / BL", value: operacion.awb_bl ?? "—" },
     { label: "Fecha de arribo", value: formatFecha(operacion.fecha_arribo) },
     { label: "Forwarder", value: operacion.forwarder ?? "—" },
-    { label: "Factura", value: operacion.factura ?? "—" },
-    {
-      label: "FOB",
-      value: `${operacion.divisa?.nombre ?? ""} ${Number(operacion.fob ?? 0).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`,
-    },
+    { label: "Peso (Kg)", value: numeroFmt(operacion.peso_kg) },
   ];
+
+  const camposComercial = [
+    { label: "Incoterm", value: operacion.incoterm?.nombre ?? "—" },
+    { label: "Divisa", value: operacion.divisa?.nombre ?? "—" },
+    { label: "FOB", value: numeroFmt(operacion.fob) },
+    { label: "TC", value: numeroFmt(operacion.tc) },
+    { label: "Gastos hasta FOB", value: numeroFmt(operacion.gastos_fob) },
+    { label: "Flete", value: numeroFmt(operacion.flete) },
+    { label: "Seguro", value: numeroFmt(operacion.seguro) },
+    { label: "Ajuste", value: numeroFmt(operacion.ajuste) },
+    { label: "Base imponible", value: numeroFmt(operacion.base_imponible) },
+    { label: "Factura", value: operacion.factura ?? "—" },
+    { label: "Fecha de factura", value: formatFecha(operacion.fecha_factura) },
+    { label: "Orden de compra", value: operacion.orden_compra ?? "—" },
+    { label: "Facturas Exelsia", value: operacion.facturas_exelsia ?? "—" },
+    { label: "Fecha de factura Exelsia", value: formatFecha(operacion.fecha_factura_exelsia) },
+  ];
+
+  const camposAduana = [
+    { label: "Envío de orden / Terminal", value: operacion.envio_terminal ?? "—" },
+    { label: "NCM", value: operacion.ncm ?? "—" },
+    { label: "Oficialización DJAI", value: operacion.oficializacion_dua ?? "—" },
+    { label: "N° de oficialización", value: operacion.numero_oficializacion ?? "—" },
+    { label: "Fecha de oficialización", value: formatFecha(operacion.fecha_oficializacion) },
+    { label: "Fecha de entrega", value: formatFecha(operacion.fecha_entrega) },
+    { label: "Despacho", value: operacion.despacho ?? "—" },
+    { label: "Intervinientes", value: operacion.intervinientes ?? "—" },
+  ];
+
+  const camposAnticipos = [
+    { label: "Anticipo solicitado", value: numeroFmt(operacion.anticipo_solicitado) },
+    { label: "Fecha de anticipo", value: formatFecha(operacion.fecha_anticipo) },
+    { label: "Anticipo depositado", value: numeroFmt(operacion.anticipo_depositado) },
+    { label: "Pendiente", value: numeroFmt(operacion.pendiente) },
+    { label: "Fecha de depósito", value: formatFecha(operacion.fecha_deposito_anticipo) },
+    { label: "MAFIA solicitado", value: numeroFmt(operacion.mafia_solicitado) },
+    { label: "Fecha dep. MAFIA", value: formatFecha(operacion.fecha_mafia_deposito) },
+    { label: "MAFIA depositado", value: numeroFmt(operacion.mafia_depositado) },
+    { label: "Fecha de depósito MAFIA", value: formatFecha(operacion.fecha_deposito_mafia) },
+  ];
+
+  function GrupoCampos({ titulo, campos }: { titulo: string; campos: { label: string; value: string }[] }) {
+    return (
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{titulo}</p>
+        <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+          {campos.map(({ label, value }) => (
+            <div key={label}>
+              <dt className="text-xs text-muted-foreground">{label}</dt>
+              <dd className="text-sm font-medium">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -99,6 +153,36 @@ export default async function OperacionDetailPage({
                 forwarder: operacion.forwarder,
                 factura: operacion.factura,
                 descripcion: operacion.descripcion,
+                fecha_orden: operacion.fecha_orden,
+                peso_kg: operacion.peso_kg,
+                fecha_factura: operacion.fecha_factura,
+                orden_compra: operacion.orden_compra,
+                envio_terminal: operacion.envio_terminal,
+                oficializacion_dua: operacion.oficializacion_dua,
+                tc: operacion.tc,
+                gastos_fob: operacion.gastos_fob,
+                flete: operacion.flete,
+                seguro: operacion.seguro,
+                ajuste: operacion.ajuste,
+                base_imponible: operacion.base_imponible,
+                ncm: operacion.ncm,
+                intervinientes: operacion.intervinientes,
+                numero_oficializacion: operacion.numero_oficializacion,
+                fecha_oficializacion: operacion.fecha_oficializacion,
+                fecha_entrega: operacion.fecha_entrega,
+                anticipo_solicitado: operacion.anticipo_solicitado,
+                fecha_anticipo: operacion.fecha_anticipo,
+                anticipo_depositado: operacion.anticipo_depositado,
+                pendiente: operacion.pendiente,
+                fecha_deposito_anticipo: operacion.fecha_deposito_anticipo,
+                mafia_solicitado: operacion.mafia_solicitado,
+                fecha_mafia_deposito: operacion.fecha_mafia_deposito,
+                mafia_depositado: operacion.mafia_depositado,
+                fecha_deposito_mafia: operacion.fecha_deposito_mafia,
+                despacho: operacion.despacho,
+                facturas_exelsia: operacion.facturas_exelsia,
+                fecha_factura_exelsia: operacion.fecha_factura_exelsia,
+                comentarios: operacion.comentarios,
               }}
             />
             <EstadoSelector
@@ -114,15 +198,14 @@ export default async function OperacionDetailPage({
             <CardHeader>
               <CardTitle className="text-base">Datos de la operación</CardTitle>
             </CardHeader>
-            <CardContent>
-              <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-                {campos.map(({ label, value }) => (
-                  <div key={label}>
-                    <dt className="text-xs text-muted-foreground">{label}</dt>
-                    <dd className="text-sm font-medium">{value}</dd>
-                  </div>
-                ))}
-              </dl>
+            <CardContent className="space-y-6">
+              <GrupoCampos titulo="General" campos={camposGeneral} />
+              <Separator />
+              <GrupoCampos titulo="Comercial" campos={camposComercial} />
+              <Separator />
+              <GrupoCampos titulo="Aduana" campos={camposAduana} />
+              <Separator />
+              <GrupoCampos titulo="Anticipos / MAFIA" campos={camposAnticipos} />
             </CardContent>
           </Card>
 

@@ -9,10 +9,20 @@ function optionalId(formData: FormData, key: string) {
   return value || null;
 }
 
-function datosDeFormulario(formData: FormData) {
-  const fob = String(formData.get("fob") ?? "");
-  const fechaArribo = String(formData.get("fecha_arribo") ?? "");
+function texto(formData: FormData, key: string) {
+  return String(formData.get(key) ?? "") || null;
+}
 
+function numero(formData: FormData, key: string) {
+  const v = String(formData.get(key) ?? "");
+  return v ? Number(v) : null;
+}
+
+function fecha(formData: FormData, key: string) {
+  return texto(formData, key);
+}
+
+function datosDeFormulario(formData: FormData) {
   return {
     orden: String(formData.get("orden") ?? ""),
     cliente_id: String(formData.get("cliente_id") ?? ""),
@@ -21,12 +31,42 @@ function datosDeFormulario(formData: FormData) {
     via_id: optionalId(formData, "via_id"),
     incoterm_id: optionalId(formData, "incoterm_id"),
     divisa_id: optionalId(formData, "divisa_id"),
-    awb_bl: String(formData.get("awb_bl") ?? "") || null,
-    fecha_arribo: fechaArribo || null,
-    forwarder: String(formData.get("forwarder") ?? "") || null,
-    factura: String(formData.get("factura") ?? "") || null,
-    fob: fob ? Number(fob) : null,
-    descripcion: String(formData.get("descripcion") ?? "") || null,
+    awb_bl: texto(formData, "awb_bl"),
+    fecha_arribo: fecha(formData, "fecha_arribo"),
+    forwarder: texto(formData, "forwarder"),
+    factura: texto(formData, "factura"),
+    fob: numero(formData, "fob"),
+    descripcion: texto(formData, "descripcion"),
+    fecha_orden: fecha(formData, "fecha_orden"),
+    peso_kg: numero(formData, "peso_kg"),
+    fecha_factura: fecha(formData, "fecha_factura"),
+    orden_compra: texto(formData, "orden_compra"),
+    envio_terminal: texto(formData, "envio_terminal"),
+    oficializacion_dua: texto(formData, "oficializacion_dua"),
+    tc: numero(formData, "tc"),
+    gastos_fob: numero(formData, "gastos_fob"),
+    flete: numero(formData, "flete"),
+    seguro: numero(formData, "seguro"),
+    ajuste: numero(formData, "ajuste"),
+    base_imponible: numero(formData, "base_imponible"),
+    ncm: texto(formData, "ncm"),
+    intervinientes: texto(formData, "intervinientes"),
+    numero_oficializacion: texto(formData, "numero_oficializacion"),
+    fecha_oficializacion: fecha(formData, "fecha_oficializacion"),
+    fecha_entrega: fecha(formData, "fecha_entrega"),
+    anticipo_solicitado: numero(formData, "anticipo_solicitado"),
+    fecha_anticipo: fecha(formData, "fecha_anticipo"),
+    anticipo_depositado: numero(formData, "anticipo_depositado"),
+    pendiente: numero(formData, "pendiente"),
+    fecha_deposito_anticipo: fecha(formData, "fecha_deposito_anticipo"),
+    mafia_solicitado: numero(formData, "mafia_solicitado"),
+    fecha_mafia_deposito: fecha(formData, "fecha_mafia_deposito"),
+    mafia_depositado: numero(formData, "mafia_depositado"),
+    fecha_deposito_mafia: fecha(formData, "fecha_deposito_mafia"),
+    despacho: texto(formData, "despacho"),
+    facturas_exelsia: texto(formData, "facturas_exelsia"),
+    fecha_factura_exelsia: fecha(formData, "fecha_factura_exelsia"),
+    comentarios: texto(formData, "comentarios"),
   };
 }
 

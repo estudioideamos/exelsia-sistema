@@ -7,9 +7,13 @@ import { cn } from "@/lib/utils";
 
 export type SortDir = "asc" | "desc";
 
-export function useSort<T>(items: T[], accessors: Record<string, (item: T) => string | number | null>) {
-  const [sortKey, setSortKey] = useState<string | null>(null);
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+export function useSort<T>(
+  items: T[],
+  accessors: Record<string, (item: T) => string | number | null>,
+  initial?: { key: string; dir: SortDir }
+) {
+  const [sortKey, setSortKey] = useState<string | null>(initial?.key ?? null);
+  const [sortDir, setSortDir] = useState<SortDir>(initial?.dir ?? "asc");
 
   const sorted = useMemo(() => {
     if (!sortKey || !accessors[sortKey]) return items;

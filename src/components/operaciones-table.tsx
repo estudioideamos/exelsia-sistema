@@ -53,7 +53,10 @@ const SORT_ACCESSORS: Record<string, (op: OperacionRow) => string | number | nul
 
 export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] }) {
   const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set());
-  const { sorted, sortKey, sortDir, toggleSort } = useSort(operaciones, SORT_ACCESSORS);
+  const { sorted, sortKey, sortDir, toggleSort } = useSort(operaciones, SORT_ACCESSORS, {
+    key: "fecha_arribo",
+    dir: "desc",
+  });
   const pagination = usePagination(sorted);
 
   const todasSeleccionadas = operaciones.length > 0 && seleccionadas.size === operaciones.length;
