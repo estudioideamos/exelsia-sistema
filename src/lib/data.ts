@@ -52,14 +52,26 @@ const OPERACION_SELECT = `
   cliente:clientes(nombre)
 `;
 
+const PAGE_SIZE = 1000;
+
 export async function getOperaciones() {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("operaciones")
-    .select(OPERACION_SELECT)
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []) as unknown as OperacionRow[];
+  const todas: OperacionRow[] = [];
+  let desde = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("operaciones")
+      .select(OPERACION_SELECT)
+      .order("created_at", { ascending: false })
+      .range(desde, desde + PAGE_SIZE - 1);
+    if (error) throw error;
+    todas.push(...((data ?? []) as unknown as OperacionRow[]));
+    if (!data || data.length < PAGE_SIZE) break;
+    desde += PAGE_SIZE;
+  }
+
+  return todas;
 }
 
 export async function getOperacion(id: string) {
