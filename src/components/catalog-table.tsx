@@ -46,10 +46,9 @@ export type CatalogColumn<T> = {
   key: keyof T;
   label: string;
   className?: string;
-  render?: (row: T) => React.ReactNode;
 };
 
-type Row = { id: string } & Record<string, string | null>;
+type Row = { id: string } & Record<string, string | null | React.ReactNode>;
 
 function ItemForm<T extends Row>({
   columns,
@@ -81,7 +80,7 @@ function ItemForm<T extends Row>({
             <Input
               id={String(col.key)}
               name={String(col.key)}
-              defaultValue={defaultValues?.[String(col.key)] ?? ""}
+              defaultValue={(defaultValues?.[String(col.key)] as string) ?? ""}
               required={String(col.key) === "nombre"}
             />
           </div>
@@ -195,11 +194,14 @@ export function CatalogTable<T extends Row>({
               <TableBody>
                 {rows.map((row) => (
                   <TableRow key={row.id}>
-                    {columns.map((col) => (
-                      <TableCell key={String(col.key)} className={col.className}>
-                        {col.render ? col.render(row) : String(row[col.key] ?? "")}
-                      </TableCell>
-                    ))}
+                    {columns.map((col) => {
+                      const display = row[`_display_${String(col.key)}`];
+                      return (
+                        <TableCell key={String(col.key)} className={col.className}>
+                          {display != null ? display : String(row[col.key] ?? "")}
+                        </TableCell>
+                      );
+                    })}
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button

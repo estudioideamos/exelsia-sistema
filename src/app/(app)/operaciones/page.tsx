@@ -10,11 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { NuevaOperacionDialog } from "@/components/nueva-operacion-dialog";
+import { OperacionDialog } from "@/components/operacion-dialog";
 import { ESTADOS } from "@/lib/mock-data";
 import { getOperaciones } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
-import { Plane, Ship as ShipIcon, Truck } from "lucide-react";
+import { Plane, Ship as ShipIcon, Truck, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const viaIcon: Record<string, typeof Plane> = {
   Aéreo: Plane,
@@ -44,7 +45,13 @@ export default async function OperacionesPage() {
       />
       <div className="flex-1 space-y-4 p-6">
         <div className="flex items-center justify-end">
-          <NuevaOperacionDialog
+          <OperacionDialog
+            trigger={
+              <Button size="sm">
+                <Plus className="h-4 w-4" />
+                Nueva operación
+              </Button>
+            }
             clientes={clientesRes.data ?? []}
             exportadores={exportadoresRes.data ?? []}
             paises={paisesRes.data ?? []}

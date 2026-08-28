@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Loader2, Save, Mail } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -74,14 +74,8 @@ export function EmailTemplateEditor({
   return (
     <Card className="border-border/60">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Mail className="h-4 w-4 text-primary" />
-          Aviso por email de cambio de estado
-        </CardTitle>
-        <CardDescription>
-          Este es el email que recibe el cliente cada vez que cambia el estado de una operación.
-          Hacé click en una variable para insertarla en el cuerpo.
-        </CardDescription>
+        <CardTitle className="text-base">Contenido del email</CardTitle>
+        <CardDescription>Hacé click en una variable para insertarla en el cuerpo.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="space-y-2">

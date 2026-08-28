@@ -2,12 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppTopbar } from "@/components/app-topbar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { EstadoSelector } from "@/components/estado-selector";
 import { ArchivosCliente } from "@/components/archivos-cliente";
+import { OperacionDialog } from "@/components/operacion-dialog";
 import { ESTADOS } from "@/lib/mock-data";
 import { getArchivosOperacion, getOperacion } from "@/lib/data";
+import { createClient } from "@/lib/supabase/server";
+import { Pencil } from "lucide-react";
 
 export default async function OperacionDetailPage({
   params,
@@ -15,10 +19,19 @@ export default async function OperacionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const operacion = await getOperacion(id);
+  const supabase = await createClient();
+  const [operacion, archivos, clientesRes, exportadoresRes, paisesRes, viasRes, incotermsRes, divisasRes] =
+    await Promise.all([
+      getOperacion(id),
+      getArchivosOperacion(id),
+      supabase.from("clientes").select("id, nombre").order("nombre"),
+      supabase.from("exportadores").select("id, nombre").order("nombre"),
+      supabase.from("paises").select("id, nombre").order("nombre"),
+      supabase.from("vias").select("id, nombre").order("nombre"),
+      supabase.from("incoterms").select("id, nombre").order("nombre"),
+      supabase.from("divisas").select("id, nombre").order("nombre"),
+    ]);
   if (!operacion) notFound();
-
-  const archivos = await getArchivosOperacion(id);
 
   const campos = [
     { label: "Cliente", value: operacion.cliente?.nombre ?? "—" },
@@ -53,11 +66,43 @@ export default async function OperacionDetailPage({
               Ver perfil del cliente →
             </Link>
           </div>
-          <EstadoSelector
-            operacionId={operacion.id}
-            estadoActual={operacion.estado}
-            cliente={operacion.cliente?.nombre ?? "el cliente"}
-          />
+          <div className="flex items-center gap-2">
+            <OperacionDialog
+              operacionId={operacion.id}
+              trigger={
+                <Button size="sm" variant="outline">
+                  <Pencil className="h-3.5 w-3.5" />
+                  Editar
+                </Button>
+              }
+              clientes={clientesRes.data ?? []}
+              exportadores={exportadoresRes.data ?? []}
+              paises={paisesRes.data ?? []}
+              vias={viasRes.data ?? []}
+              incoterms={incotermsRes.data ?? []}
+              divisas={divisasRes.data ?? []}
+              valoresIniciales={{
+                orden: operacion.orden,
+                cliente_id: operacion.cliente_id,
+                exportador_id: operacion.exportador_id,
+                pais_origen_id: operacion.pais_origen_id,
+                via_id: operacion.via_id,
+                incoterm_id: operacion.incoterm_id,
+                divisa_id: operacion.divisa_id,
+                fob: operacion.fob,
+                awb_bl: operacion.awb_bl,
+                fecha_arribo: operacion.fecha_arribo,
+                forwarder: operacion.forwarder,
+                factura: operacion.factura,
+                descripcion: operacion.descripcion,
+              }}
+            />
+            <EstadoSelector
+              operacionId={operacion.id}
+              estadoActual={operacion.estado}
+              cliente={operacion.cliente?.nombre ?? "el cliente"}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">

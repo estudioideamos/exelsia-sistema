@@ -37,8 +37,7 @@ export async function enviarAvisoCambioEstado(datos: DatosAvisoOperacion) {
   const { data: plantilla } = await supabase
     .from("configuracion_email")
     .select("asunto, cuerpo")
-    .order("updated_at", { ascending: false })
-    .limit(1)
+    .eq("estado", datos.nuevoEstado)
     .maybeSingle();
 
   const { asunto, cuerpo } = plantilla ?? PLANTILLA_DEFAULT;

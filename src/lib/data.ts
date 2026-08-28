@@ -5,6 +5,11 @@ export type OperacionRow = {
   id: string;
   orden: string;
   cliente_id: string;
+  exportador_id: string | null;
+  pais_origen_id: string | null;
+  via_id: string | null;
+  incoterm_id: string | null;
+  divisa_id: string | null;
   awb_bl: string | null;
   fecha_arribo: string | null;
   forwarder: string | null;
@@ -21,7 +26,8 @@ export type OperacionRow = {
 };
 
 const OPERACION_SELECT = `
-  id, orden, cliente_id, awb_bl, fecha_arribo, forwarder, factura, fob, estado, descripcion,
+  id, orden, cliente_id, exportador_id, pais_origen_id, via_id, incoterm_id, divisa_id,
+  awb_bl, fecha_arribo, forwarder, factura, fob, estado, descripcion,
   divisa:divisas(nombre),
   incoterm:incoterms(nombre),
   via:vias(nombre),
