@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/login-form";
+import { ExelsiaLogo } from "@/components/exelsia-logo";
 import { Ship, ShieldCheck, BellRing, FileStack } from "lucide-react";
 
 const highlights = [
@@ -32,15 +33,7 @@ export default function LoginPage() {
 
       {/* left branding panel */}
       <div className="relative z-10 hidden w-1/2 flex-col justify-between p-12 lg:flex">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
-            EX
-          </div>
-          <div className="leading-tight">
-            <p className="text-lg font-semibold tracking-tight text-foreground">EXELSIA</p>
-            <p className="text-xs text-muted-foreground">Foreign Trade Consulting</p>
-          </div>
-        </div>
+        <ExelsiaLogo height={40} />
 
         <div className="max-w-md space-y-8">
           <div className="space-y-3">
@@ -79,11 +72,8 @@ export default function LoginPage() {
 
       {/* right login panel */}
       <div className="relative z-10 flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
-        <div className="mb-8 flex items-center gap-3 lg:hidden">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
-            EX
-          </div>
-          <p className="text-lg font-semibold tracking-tight text-foreground">EXELSIA</p>
+        <div className="mb-8 lg:hidden">
+          <ExelsiaLogo height={36} />
         </div>
 
         <LoginForm />

@@ -15,6 +15,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ExelsiaLogo } from "@/components/exelsia-logo";
 import {
   Avatar,
   AvatarFallback,
@@ -56,14 +57,8 @@ function NavLink({ href, label, icon: Icon }: (typeof nav)[number]) {
 export function AppSidebar() {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
-      <div className="flex items-center gap-3 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-sm font-bold">
-          EX
-        </div>
-        <div className="leading-tight">
-          <p className="text-sm font-semibold">EXELSIA</p>
-          <p className="text-[11px] text-sidebar-foreground/50">Sistema de operaciones</p>
-        </div>
+      <div className="flex items-center px-5 py-6">
+        <ExelsiaLogo height={34} />
       </div>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
