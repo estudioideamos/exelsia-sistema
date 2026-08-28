@@ -16,6 +16,8 @@ export default async function AppGroupLayout({ children }: { children: React.Rea
     .eq("id", authUser.id)
     .maybeSingle();
 
+  if (profile?.role === "cliente") redirect("/portal");
+
   return (
     <div className="flex min-h-screen w-full bg-background">
       <AppSidebar

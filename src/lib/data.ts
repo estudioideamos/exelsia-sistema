@@ -1,6 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
 import type { EstadoOperacion } from "@/lib/mock-data";
 
+export async function getPerfilActual() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { user: null, profile: null };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, nombre, cliente_id")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  return { user, profile };
+}
+
 export type OperacionRow = {
   id: string;
   orden: string;
