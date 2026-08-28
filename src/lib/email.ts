@@ -22,7 +22,7 @@ export async function enviarAvisoCambioEstado({
   const estadoLabel = ESTADOS[nuevoEstado]?.label ?? nuevoEstado;
 
   const { error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL || "Exelsia <notificaciones@exelsia.com.ar>",
+    from: process.env.RESEND_FROM_EMAIL || "Exelsia <onboarding@resend.dev>",
     to: email,
     subject: `Actualización de tu operación ${orden}: ${estadoLabel}`,
     html: `
