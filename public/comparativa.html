@@ -404,6 +404,42 @@
     margin-left: 4px;
   }
 
+  /* ---------- tech stack ---------- */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--panel-border);
+    border: 1px solid var(--panel-border);
+  }
+  .tech-item {
+    background: rgba(10,9,13,0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 26px 26px 22px;
+  }
+  .tech-item .tech-name {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tech-item .tech-name::before {
+    content: "";
+    width: 6px; height: 6px;
+    background: var(--cyan);
+    box-shadow: 0 0 8px 1px var(--cyan-glow);
+    flex-shrink: 0;
+  }
+  .tech-item p { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-muted); line-height: 1.5; }
+
+  @media (max-width: 720px) {
+    .tech-grid { grid-template-columns: 1fr; }
+  }
+
   /* ---------- price card ---------- */
   .price-card {
     position: relative;
@@ -492,9 +528,34 @@
   .deadline-text strong { color: var(--accent); font-weight: 600; }
   .deadline-text .sep { color: var(--ink-muted); margin: 0 8px; }
 
+  .price-cta {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 22px;
+    padding: 15px 28px;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    box-shadow: 0 0 0 0 var(--accent-glow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .price-cta svg { width: 18px; height: 18px; }
+  .price-cta:hover {
+    background: #ff5c50;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px -4px var(--accent-glow);
+  }
+
   @media (max-width: 640px) {
     .price-card { padding: 52px 22px; }
     .price-deadline { flex-wrap: wrap; justify-content: center; text-align: center; }
+    .price-cta { width: 100%; justify-content: center; }
   }
 
   /* ---------- footer ---------- */
@@ -785,6 +846,28 @@
 
   <section class="section">
     <div class="section-head reveal">
+      <h2>Tecnología utilizada</h2>
+      <div class="section-tag">La misma que usan las plataformas grandes</div>
+    </div>
+
+    <div class="tech-grid reveal">
+      <div class="tech-item">
+        <div class="tech-name">TypeScript</div>
+        <p>El lenguaje de programación de todo el sistema. Detecta errores antes de que lleguen a producción, lo que significa menos fallas para el usuario final.</p>
+      </div>
+      <div class="tech-item">
+        <div class="tech-name">React / Next.js</div>
+        <p>El framework con el que están hechos Netflix, Uber y TikTok. Permite que las páginas carguen rápido y se sientan fluidas, en cualquier dispositivo.</p>
+      </div>
+      <div class="tech-item">
+        <div class="tech-name">PostgreSQL</div>
+        <p>La base de datos donde vive toda la información. Es la que usan bancos y empresas grandes cuando la seguridad y la integridad de los datos son innegociables.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head reveal">
       <h2>Inversión del proyecto</h2>
       <div class="section-tag">Desarrollo de la plataforma</div>
     </div>
@@ -807,6 +890,11 @@
           <span id="deadline-countdown">Quedan pocos días</span>
         </div>
       </div>
+
+      <a class="price-cta" href="https://wa.me/5491168758285?text=Hola!%20Quiero%20congelar%20el%20precio%20de%20la%20oferta%20del%20sistema%20de%20Exelsia%20antes%20de%20que%20venza." target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.2-1.3c1.5.8 3.1 1.3 4.8 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2zm5.9 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3.1s.8-2.2 1.1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5.2.5.8 1.9.8 2.1.1.2.1.3 0 .5-.1.2-.1.3-.3.5-.1.2-.3.4-.4.5-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.2 2.4 1.5 2.7 1.7.3.2.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.2.7-.1.3.1 1.7.8 2 1 .3.1.5.2.6.3.1.2.1.9-.1 1.6z"/></svg>
+        <span>Congelar este precio →</span>
+      </a>
     </div>
   </section>
 
