@@ -15,6 +15,7 @@ import {
   Settings,
   History,
   ChevronsLeft,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExelsiaLogo } from "@/components/exelsia-logo";
@@ -131,6 +132,7 @@ export function AppSidebar({
       </nav>
 
       <div className="border-t border-sidebar-border p-3">
+        <NavLink href="/manual" label="Manual" icon={BookOpen} collapsed={collapsed} />
         <NavLink href="/configuracion" label="Configuración" icon={Settings} collapsed={collapsed} />
         <div
           className={cn(
