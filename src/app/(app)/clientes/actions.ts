@@ -88,3 +88,12 @@ export async function importarClientes(filas: Record<string, string>[]) {
   revalidatePath("/dashboard");
   return { creados, actualizados, errores };
 }
+
+export async function eliminarClientes(ids: string[]) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("clientes").delete().in("id", ids);
+  if (error) throw error;
+
+  revalidatePath("/clientes");
+  revalidatePath("/dashboard");
+}

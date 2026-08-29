@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TablePagination, usePagination } from "@/components/table-pagination";
+import { HorizontalScrollArea } from "@/components/horizontal-scroll-area";
 import { ArrowRight } from "lucide-react";
 import { ESTADOS } from "@/lib/mock-data";
 import type { HistorialRow } from "@/lib/data";
@@ -33,7 +34,7 @@ export function HistorialTable({ historial }: { historial: Fila[] }) {
         pageCount={pagination.pageCount}
         total={pagination.total}
       />
-      <div className="overflow-x-auto">
+      <HorizontalScrollArea>
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
@@ -95,7 +96,7 @@ export function HistorialTable({ historial }: { historial: Fila[] }) {
             )}
           </TableBody>
         </Table>
-      </div>
+      </HorizontalScrollArea>
       <TablePagination
         page={pagination.page}
         setPage={pagination.setPage}

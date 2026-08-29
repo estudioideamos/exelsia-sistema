@@ -42,6 +42,7 @@ import {
   eliminarItemCatalogo,
 } from "@/app/(app)/catalogos/actions";
 import { TablePagination, usePagination } from "@/components/table-pagination";
+import { HorizontalScrollArea } from "@/components/horizontal-scroll-area";
 import { useSort, SortableTableHead } from "@/components/sortable-header";
 
 export type CatalogColumn<T> = {
@@ -196,7 +197,7 @@ export function CatalogTable<T extends Row>({
             pageCount={pagination.pageCount}
             total={pagination.total}
           />
-          <div className="overflow-x-auto">
+          <HorizontalScrollArea>
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/40 hover:bg-muted/40">
@@ -273,7 +274,7 @@ export function CatalogTable<T extends Row>({
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </HorizontalScrollArea>
           <TablePagination
             page={pagination.page}
             setPage={pagination.setPage}

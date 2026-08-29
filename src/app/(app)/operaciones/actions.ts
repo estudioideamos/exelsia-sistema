@@ -213,3 +213,13 @@ export async function importarOperaciones(filas: Record<string, string>[]) {
   revalidatePath("/dashboard");
   return { creadas, actualizadas, errores };
 }
+
+export async function eliminarOperaciones(ids: string[]) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("operaciones").delete().in("id", ids);
+  if (error) throw error;
+
+  revalidatePath("/operaciones");
+  revalidatePath("/dashboard");
+  revalidatePath("/historial");
+}

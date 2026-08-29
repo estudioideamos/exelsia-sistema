@@ -262,6 +262,7 @@ export default async function OperacionDetailPage({
               mensajesIniciales={mensajes}
               usuarioActualId={user?.id ?? ""}
               pathARevalidar={`/operaciones/${operacion.id}`}
+              permiteEditar
             />
           </CardContent>
         </Card>

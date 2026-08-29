@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const OPCIONES_TAMANO = [10, 20, 30, 50, 100];
 
-export function usePagination<T>(items: T[], initialPageSize = 100) {
+export function usePagination<T>(items: T[], initialPageSize = 50) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSizeState] = useState(initialPageSize);
 

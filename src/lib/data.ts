@@ -276,3 +276,36 @@ export async function getMensajesOperacion(operacionId: string) {
   }) as MensajeOperacion[];
 }
 
+export type ResumenMensajes = {
+  cantidad: number;
+  ultimaFecha: string;
+  ultimoAutorEsCliente: boolean;
+};
+
+export async function getResumenMensajesPorOperacion() {
+  const supabase = await createClient();
+  const { data: mensajes } = await supabase
+    .from("operacion_mensajes")
+    .select("operacion_id, autor_id, created_at")
+    .order("created_at", { ascending: true });
+
+  const filas = mensajes ?? [];
+  const autorIds = [...new Set(filas.map((f) => f.autor_id))];
+  const rolPorAutorId = new Map<string, "admin" | "cliente">();
+  if (autorIds.length) {
+    const { data: perfiles } = await supabase.from("profiles").select("id, role").in("id", autorIds);
+    for (const p of perfiles ?? []) rolPorAutorId.set(p.id, p.role);
+  }
+
+  const resumen = new Map<string, ResumenMensajes>();
+  for (const m of filas) {
+    const actual = resumen.get(m.operacion_id);
+    resumen.set(m.operacion_id, {
+      cantidad: (actual?.cantidad ?? 0) + 1,
+      ultimaFecha: m.created_at,
+      ultimoAutorEsCliente: rolPorAutorId.get(m.autor_id) !== "admin",
+    });
+  }
+  return resumen;
+}
+

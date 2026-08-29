@@ -7,7 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExportMenu } from "@/components/export-menu";
+import { EliminarSeleccionadosButton } from "@/components/eliminar-seleccionados-button";
 import { TablePagination, usePagination } from "@/components/table-pagination";
+import { eliminarClientes } from "@/app/(app)/clientes/actions";
 import { Mail, Phone } from "lucide-react";
 
 type Cliente = {
@@ -74,13 +76,20 @@ export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
         <p className="text-sm text-muted-foreground">
           {seleccionados.size > 0 ? `${seleccionados.size} seleccionado(s)` : `${clientes.length} clientes`}
         </p>
-        <ExportMenu
-          cantidad={seleccionados.size}
-          nombreArchivo="clientes"
-          titulo="Clientes"
-          columnas={COLUMNAS_EXPORT}
-          filas={filasExport}
-        />
+        <div className="flex items-center gap-2">
+          <EliminarSeleccionadosButton
+            ids={[...seleccionados]}
+            onEliminar={eliminarClientes}
+            entidadLabel="cliente"
+          />
+          <ExportMenu
+            cantidad={seleccionados.size}
+            nombreArchivo="clientes"
+            titulo="Clientes"
+            columnas={COLUMNAS_EXPORT}
+            filas={filasExport}
+          />
+        </div>
       </div>
 
       <div className="rounded-lg border border-border/60">

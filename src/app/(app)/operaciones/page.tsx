@@ -2,16 +2,17 @@ import { AppTopbar } from "@/components/app-topbar";
 import { OperacionDialog } from "@/components/operacion-dialog";
 import { OperacionesTable } from "@/components/operaciones-table";
 import { ImportOperacionesButton } from "@/components/import-operaciones-button";
-import { getOperaciones } from "@/lib/data";
+import { getOperaciones, getResumenMensajesPorOperacion } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default async function OperacionesPage() {
   const supabase = await createClient();
-  const [operaciones, clientesRes, exportadoresRes, paisesRes, viasRes, incotermsRes, divisasRes] =
+  const [operaciones, mensajesMap, clientesRes, exportadoresRes, paisesRes, viasRes, incotermsRes, divisasRes] =
     await Promise.all([
       getOperaciones(),
+      getResumenMensajesPorOperacion(),
       supabase.from("clientes").select("id, nombre").order("nombre"),
       supabase.from("exportadores").select("id, nombre").order("nombre"),
       supabase.from("paises").select("id, nombre").order("nombre"),
@@ -19,6 +20,7 @@ export default async function OperacionesPage() {
       supabase.from("incoterms").select("id, nombre").order("nombre"),
       supabase.from("divisas").select("id, nombre").order("nombre"),
     ]);
+  const mensajesPorOperacion = Object.fromEntries(mensajesMap);
 
   return (
     <>
@@ -45,7 +47,7 @@ export default async function OperacionesPage() {
           />
         </div>
 
-        <OperacionesTable operaciones={operaciones} />
+        <OperacionesTable operaciones={operaciones} mensajesPorOperacion={mensajesPorOperacion} />
       </div>
     </>
   );

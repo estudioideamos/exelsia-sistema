@@ -19,3 +19,22 @@ export async function enviarMensajeOperacion(operacionId: string, texto: string,
 
   revalidatePath(pathARevalidar);
 }
+
+export async function editarMensajeOperacion(mensajeId: string, texto: string, pathARevalidar: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("operacion_mensajes")
+    .update({ texto: texto.trim() })
+    .eq("id", mensajeId);
+  if (error) throw error;
+
+  revalidatePath(pathARevalidar);
+}
+
+export async function borrarMensajeOperacion(mensajeId: string, pathARevalidar: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("operacion_mensajes").delete().eq("id", mensajeId);
+  if (error) throw error;
+
+  revalidatePath(pathARevalidar);
+}

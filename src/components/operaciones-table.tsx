@@ -14,12 +14,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ExportMenu } from "@/components/export-menu";
+import { EliminarSeleccionadosButton } from "@/components/eliminar-seleccionados-button";
+import { HorizontalScrollArea } from "@/components/horizontal-scroll-area";
 import { TablePagination, usePagination } from "@/components/table-pagination";
 import { useSort, SortableTableHead } from "@/components/sortable-header";
 import { ESTADOS } from "@/lib/mock-data";
-import type { OperacionRow } from "@/lib/data";
+import type { OperacionRow, ResumenMensajes } from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
-import { Plane, Ship as ShipIcon, Truck } from "lucide-react";
+import { eliminarOperaciones } from "@/app/(app)/operaciones/actions";
+import { Plane, Ship as ShipIcon, Truck, MessageCircle } from "lucide-react";
 
 const viaIcon: Record<string, typeof Plane> = {
   Aéreo: Plane,
@@ -51,7 +54,13 @@ const SORT_ACCESSORS: Record<string, (op: OperacionRow) => string | number | nul
   estado: (op) => ESTADOS[op.estado]?.label ?? op.estado,
 };
 
-export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] }) {
+export function OperacionesTable({
+  operaciones,
+  mensajesPorOperacion = {},
+}: {
+  operaciones: OperacionRow[];
+  mensajesPorOperacion?: Record<string, ResumenMensajes>;
+}) {
   const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set());
   const { sorted, sortKey, sortDir, toggleSort } = useSort(operaciones, SORT_ACCESSORS, {
     key: "fecha_arribo",
@@ -97,14 +106,21 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
             ? `${seleccionadas.size} seleccionada(s)`
             : `${operaciones.length} operaciones`}
         </p>
-        <ExportMenu
-          cantidad={seleccionadas.size}
-          nombreArchivo="operaciones"
-          titulo="Operaciones"
-          columnas={COLUMNAS_EXPORT}
-          filas={filasExport}
-          disabled={operaciones.length === 0}
-        />
+        <div className="flex items-center gap-2">
+          <EliminarSeleccionadosButton
+            ids={[...seleccionadas]}
+            onEliminar={eliminarOperaciones}
+            entidadLabel="operación"
+          />
+          <ExportMenu
+            cantidad={seleccionadas.size}
+            nombreArchivo="operaciones"
+            titulo="Operaciones"
+            columnas={COLUMNAS_EXPORT}
+            filas={filasExport}
+            disabled={operaciones.length === 0}
+          />
+        </div>
       </div>
 
       <Card className="border-border/60 overflow-hidden py-0">
@@ -117,7 +133,7 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
           pageCount={pagination.pageCount}
           total={pagination.total}
         />
-        <div className="overflow-x-auto">
+        <HorizontalScrollArea>
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40">
@@ -133,18 +149,22 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
                 <SortableTableHead label="Arribo" sortKey="fecha_arribo" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
                 <SortableTableHead label="FOB" sortKey="fob" activeKey={sortKey} dir={sortDir} onSort={toggleSort} className="text-right" />
                 <SortableTableHead label="Estado" sortKey="estado" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+                <TableHead className="w-10 text-center">
+                  <MessageCircle className="mx-auto h-3.5 w-3.5" />
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {operaciones.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={11} className="py-10 text-center text-muted-foreground">
                     Todavía no hay operaciones cargadas.
                   </TableCell>
                 </TableRow>
               ) : (
                 pagination.paginated.map((op) => {
                   const Icon = (op.via?.nombre && viaIcon[op.via.nombre]) || ShipIcon;
+                  const resumenMsjs = mensajesPorOperacion[op.id];
                   return (
                     <TableRow key={op.id} className="group" data-state={seleccionadas.has(op.id) ? "selected" : undefined}>
                       <TableCell>
@@ -194,13 +214,32 @@ export function OperacionesTable({ operaciones }: { operaciones: OperacionRow[] 
                           {ESTADOS[op.estado].label}
                         </Badge>
                       </TableCell>
+                      <TableCell className="text-center">
+                        {resumenMsjs ? (
+                          <span
+                            className={
+                              resumenMsjs.ultimoAutorEsCliente
+                                ? "inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary"
+                                : "inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
+                            }
+                            title={
+                              resumenMsjs.ultimoAutorEsCliente
+                                ? "El cliente escribió, esperando respuesta"
+                                : "Sin mensajes nuevos del cliente"
+                            }
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                            {resumenMsjs.cantidad}
+                          </span>
+                        ) : null}
+                      </TableCell>
                     </TableRow>
                   );
                 })
               )}
             </TableBody>
           </Table>
-        </div>
+        </HorizontalScrollArea>
         <TablePagination
           page={pagination.page}
           setPage={pagination.setPage}
