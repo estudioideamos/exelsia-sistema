@@ -82,7 +82,7 @@
     gap: 16px;
     flex-wrap: wrap;
   }
-  .masthead img.logo { height: 24px; width: auto; display: block; }
+  .masthead img.logo { height: 38px; width: auto; display: block; }
   .doc-meta {
     font-family: var(--font-mono);
     font-size: 11.5px;
@@ -403,6 +403,23 @@
     font-weight: 400;
     margin-left: 4px;
   }
+  .usage-bar { margin-top: 10px; }
+  .usage-bar-track {
+    height: 3px;
+    background: var(--panel-border);
+    overflow: hidden;
+  }
+  .usage-bar-fill {
+    height: 100%;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan-glow);
+  }
+  .usage-bar-label {
+    display: block;
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: var(--ink-muted);
+  }
 
   /* ---------- tech stack ---------- */
   .tech-grid {
@@ -500,13 +517,19 @@
     color: var(--ink-muted);
     max-width: 46ch;
   }
-  .price-deadline {
+  .price-footer {
     position: relative;
     z-index: 1;
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  .price-deadline {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    margin-top: 36px;
     border: 1px solid var(--panel-border);
     background: rgba(7,6,10,0.7);
     padding: 10px 20px;
@@ -529,28 +552,25 @@
   .deadline-text .sep { color: var(--ink-muted); margin: 0 8px; }
 
   .price-cta {
-    position: relative;
-    z-index: 1;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 22px;
-    padding: 15px 28px;
+    gap: 8px;
+    padding: 11px 22px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13.5px;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .price-cta svg { width: 15px; height: 15px; color: var(--accent); transition: color 0.2s ease; }
+  .price-cta:hover {
     background: var(--accent);
     color: #fff;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 15px;
-    text-decoration: none;
-    box-shadow: 0 0 0 0 var(--accent-glow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   }
-  .price-cta svg { width: 18px; height: 18px; }
-  .price-cta:hover {
-    background: #ff5c50;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 24px -4px var(--accent-glow);
-  }
+  .price-cta:hover svg { color: #fff; }
 
   @media (max-width: 640px) {
     .price-card { padding: 52px 22px; }
@@ -645,10 +665,10 @@
 
     <div class="hero-content reveal in">
       <div class="eyebrow">Antes / Ahora</div>
-      <h1>El sistema de gestión de Exelsia, <span class="hl">reconstruido</span> de punta a punta.</h1>
+      <h1>De un sistema anticuado a la <span class="hl">torre de control</span> de Exelsia.</h1>
       <p class="hero-sub">
-        Este documento resume qué cambia entre la plataforma anterior (exelsia.com.ar/clientes) y la
-        nueva, para que quede claro qué gana el equipo y qué gana cada cliente.
+        Comparamos la plataforma que usan hoy (exelsia.com.ar/clientes) con la que reconstruimos
+        de punta a punta — para que veas exactamente qué gana tu equipo, y qué gana cada cliente.
       </p>
     </div>
 
@@ -670,8 +690,8 @@
 
   <section class="section">
     <div class="section-head reveal">
-      <h2>Lo que más cambia</h2>
-      <div class="section-tag">Cuatro diferencias centrales</div>
+      <h2>Todo lo que ganás</h2>
+      <div class="section-tag">4 cambios que se notan desde el día uno</div>
     </div>
     <div class="benefits reveal">
       <div class="benefit">
@@ -824,6 +844,10 @@
               <span class="stack-price">USD 20<span>/mes si hace falta</span></span>
             </div>
             <p>Aloja la plataforma y la mantiene siempre online</p>
+            <div class="usage-bar">
+              <div class="usage-bar-track"><div class="usage-bar-fill" style="width:3%"></div></div>
+              <span class="usage-bar-label">Tráfico actual muy por debajo del límite gratuito (100 GB/mes)</span>
+            </div>
           </li>
           <li>
             <div class="stack-item-head">
@@ -831,6 +855,14 @@
               <span class="stack-price">USD 25<span>/mes si hace falta</span></span>
             </div>
             <p>Base de datos, login y almacenamiento de archivos</p>
+            <div class="usage-bar">
+              <div class="usage-bar-track"><div class="usage-bar-fill" style="width:1%"></div></div>
+              <span class="usage-bar-label">Base de datos: &lt;1% de 500 MB usados (2.373 operaciones cargadas)</span>
+            </div>
+            <div class="usage-bar">
+              <div class="usage-bar-track"><div class="usage-bar-fill" style="width:1%"></div></div>
+              <span class="usage-bar-label">Almacenamiento de archivos: &lt;1% de 1 GB usados</span>
+            </div>
           </li>
           <li>
             <div class="stack-item-head">
@@ -838,6 +870,10 @@
               <span class="stack-price">USD 20<span>/mes (+3.000 emails)</span></span>
             </div>
             <p>Envío de los emails automáticos por cambio de estado</p>
+            <div class="usage-bar">
+              <div class="usage-bar-track"><div class="usage-bar-fill" style="width:2%"></div></div>
+              <span class="usage-bar-label">Muy por debajo del límite gratuito de 3.000 emails/mes</span>
+            </div>
           </li>
         </ul>
       </div>
@@ -869,19 +905,20 @@
   <section class="section">
     <div class="section-head reveal">
       <h2>Inversión del proyecto</h2>
-      <div class="section-tag">Desarrollo de la plataforma</div>
+      <div class="section-tag">Pago único · sin mensualidades de desarrollo</div>
     </div>
 
     <div class="price-card reveal">
       <span class="corner tl"></span><span class="corner tr"></span>
       <span class="corner bl"></span><span class="corner br"></span>
 
-      <div class="price-label">Costo del desarrollo</div>
+      <div class="price-label">Inversión única</div>
       <div class="price-value">$700.000 <span>ARS</span></div>
       <p class="price-desc">
-        Incluye todo lo detallado en este documento: portal de cliente, avisos automáticos,
+        Todo lo que viste en este documento, en un solo pago: portal de cliente, avisos automáticos,
         historial, mensajería, importación/exportación y seguridad a nivel de base de datos.
       </p>
+      <div class="price-footer">
       <div class="price-deadline">
         <div class="deadline-dot"></div>
         <div class="deadline-text">
@@ -895,12 +932,13 @@
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.2-1.3c1.5.8 3.1 1.3 4.8 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2zm5.9 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3.1s.8-2.2 1.1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5.2.5.8 1.9.8 2.1.1.2.1.3 0 .5-.1.2-.1.3-.3.5-.1.2-.3.4-.4.5-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.2 2.4 1.5 2.7 1.7.3.2.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.2.7-.1.3.1 1.7.8 2 1 .3.1.5.2.6.3.1.2.1.9-.1 1.6z"/></svg>
         <span>Congelar este precio →</span>
       </a>
+      </div>
     </div>
   </section>
 
   <footer>
     <a class="credit-link" href="https://ideamos.com.ar" target="_blank" rel="noopener">
-      <span class="made-by">Preparado por</span>
+      <span class="made-by">Concepto y desarrollo por</span>
       <span class="credit-badge"><img src="/ideamos-logo.webp" alt="Estudio Ideamos"></span>
     </a>
     <div class="stamp">Exelsia · Sistema de Operaciones</div>
