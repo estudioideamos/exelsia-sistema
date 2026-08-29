@@ -372,15 +372,37 @@
   .cost-note strong { color: var(--ink); font-weight: 600; }
   .stack-list {
     list-style: none;
-    margin: 16px 0 0;
-    padding: 14px 0 0;
-    border-top: 1px solid var(--panel-border);
+    margin: 18px 0 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
   }
-  .stack-list li { font-size: 13.5px; color: var(--ink-muted); }
-  .stack-list li strong { color: var(--ink); font-weight: 600; }
+  .stack-list li {
+    padding: 13px 0;
+    border-top: 1px solid var(--panel-border);
+  }
+  .stack-list li:last-child { padding-bottom: 0; }
+  .stack-item-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .stack-list strong { color: var(--ink); font-weight: 700; font-size: 14.5px; }
+  .stack-list p { margin: 4px 0 0; font-size: 13px; color: var(--ink-muted); }
+  .stack-price {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--cyan);
+    white-space: nowrap;
+  }
+  .stack-price span {
+    color: var(--ink-muted);
+    font-weight: 400;
+    margin-left: 4px;
+  }
 
   /* ---------- price card ---------- */
   .price-card {
@@ -731,13 +753,31 @@
       <div>
         <p>
           Hoy el sistema nuevo funciona a <strong>costo $0</strong>, dentro de los planes gratuitos de
-          los servicios que usa. Si el uso crece mucho, el paso a un plan pago rondaría
-          <strong>USD 45 por mes</strong> — sin migración, solo un cambio de plan.
+          los servicios que usa. Cada uno pasa a pago recién si el uso crece mucho — nunca implica
+          migrar nada, solo cambiar de plan en un clic.
         </p>
         <ul class="stack-list">
-          <li><strong>Vercel</strong> — aloja la plataforma y la mantiene siempre online</li>
-          <li><strong>Supabase</strong> — base de datos, login y almacenamiento de archivos</li>
-          <li><strong>Resend</strong> — envío de los emails automáticos por cambio de estado</li>
+          <li>
+            <div class="stack-item-head">
+              <strong>Vercel</strong>
+              <span class="stack-price">USD 20<span>/mes si hace falta</span></span>
+            </div>
+            <p>Aloja la plataforma y la mantiene siempre online</p>
+          </li>
+          <li>
+            <div class="stack-item-head">
+              <strong>Supabase</strong>
+              <span class="stack-price">USD 25<span>/mes si hace falta</span></span>
+            </div>
+            <p>Base de datos, login y almacenamiento de archivos</p>
+          </li>
+          <li>
+            <div class="stack-item-head">
+              <strong>Resend</strong>
+              <span class="stack-price">USD 20<span>/mes (+3.000 emails)</span></span>
+            </div>
+            <p>Envío de los emails automáticos por cambio de estado</p>
+          </li>
         </ul>
       </div>
     </div>
