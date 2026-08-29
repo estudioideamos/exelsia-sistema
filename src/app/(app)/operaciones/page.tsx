@@ -29,25 +29,29 @@ export default async function OperacionesPage() {
         description={`${operaciones.length} operaciones registradas`}
       />
       <div className="flex-1 space-y-4 p-6">
-        <div className="flex items-center justify-end gap-2">
-          <ImportOperacionesButton />
-          <OperacionDialog
-            trigger={
-              <Button size="sm">
-                <Plus className="h-4 w-4" />
-                Nueva operación
-              </Button>
-            }
-            clientes={clientesRes.data ?? []}
-            exportadores={exportadoresRes.data ?? []}
-            paises={paisesRes.data ?? []}
-            vias={viasRes.data ?? []}
-            incoterms={incotermsRes.data ?? []}
-            divisas={divisasRes.data ?? []}
-          />
-        </div>
-
-        <OperacionesTable operaciones={operaciones} mensajesPorOperacion={mensajesPorOperacion} />
+        <OperacionesTable
+          operaciones={operaciones}
+          mensajesPorOperacion={mensajesPorOperacion}
+          accionesExtra={
+            <>
+              <ImportOperacionesButton />
+              <OperacionDialog
+                trigger={
+                  <Button size="sm">
+                    <Plus className="h-4 w-4" />
+                    Nueva operación
+                  </Button>
+                }
+                clientes={clientesRes.data ?? []}
+                exportadores={exportadoresRes.data ?? []}
+                paises={paisesRes.data ?? []}
+                vias={viasRes.data ?? []}
+                incoterms={incotermsRes.data ?? []}
+                divisas={divisasRes.data ?? []}
+              />
+            </>
+          }
+        />
       </div>
     </>
   );

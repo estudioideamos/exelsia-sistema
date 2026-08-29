@@ -16,12 +16,15 @@ export default async function ClientesPage() {
     <>
       <AppTopbar title="Clientes" description={`${clientes.length} clientes registrados`} />
       <div className="flex-1 space-y-4 p-6">
-        <div className="flex items-center justify-end gap-2">
-          <ImportClientesButton />
-          <NuevoClienteDialog paises={paises ?? []} />
-        </div>
-
-        <ClientesGrid clientes={clientes} />
+        <ClientesGrid
+          clientes={clientes}
+          accionesExtra={
+            <>
+              <ImportClientesButton />
+              <NuevoClienteDialog paises={paises ?? []} />
+            </>
+          }
+        />
       </div>
     </>
   );

@@ -36,7 +36,13 @@ const COLUMNAS_EXPORT = [
   { label: "Dirección", key: "direccion" },
 ];
 
-export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
+export function ClientesGrid({
+  clientes,
+  accionesExtra,
+}: {
+  clientes: Cliente[];
+  accionesExtra?: React.ReactNode;
+}) {
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
   const pagination = usePagination(clientes);
 
@@ -62,21 +68,13 @@ export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
     }));
   }, [clientes, seleccionados]);
 
-  if (clientes.length === 0) {
-    return (
-      <p className="py-16 text-center text-sm text-muted-foreground">
-        Todavía no hay clientes cargados.
-      </p>
-    );
-  }
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {seleccionados.size > 0 ? `${seleccionados.size} seleccionado(s)` : `${clientes.length} clientes`}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <EliminarSeleccionadosButton
             ids={[...seleccionados]}
             onEliminar={eliminarClientes}
@@ -88,24 +86,32 @@ export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
             titulo="Clientes"
             columnas={COLUMNAS_EXPORT}
             filas={filasExport}
+            disabled={clientes.length === 0}
           />
+          {accionesExtra}
         </div>
       </div>
 
-      <div className="rounded-lg border border-border/60">
-        <TablePagination
-          position="top"
-          page={pagination.page}
-          setPage={pagination.setPage}
-          pageSize={pagination.pageSize}
-          setPageSize={pagination.setPageSize}
-          pageCount={pagination.pageCount}
-          total={pagination.total}
-        />
-      </div>
+      {clientes.length === 0 ? (
+        <p className="py-16 text-center text-sm text-muted-foreground">
+          Todavía no hay clientes cargados.
+        </p>
+      ) : (
+        <>
+          <div className="rounded-lg border border-border/60">
+            <TablePagination
+              position="top"
+              page={pagination.page}
+              setPage={pagination.setPage}
+              pageSize={pagination.pageSize}
+              setPageSize={pagination.setPageSize}
+              pageCount={pagination.pageCount}
+              total={pagination.total}
+            />
+          </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {pagination.paginated.map((cliente) => {
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {pagination.paginated.map((cliente) => {
           const operacionesActivas = Array.isArray(cliente.operaciones)
             ? (cliente.operaciones[0]?.count ?? 0)
             : 0;
@@ -159,20 +165,22 @@ export function ClientesGrid({ clientes }: { clientes: Cliente[] }) {
                 </CardContent>
               </Link>
             </Card>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
 
-      <div className="rounded-lg border border-border/60">
-        <TablePagination
-          page={pagination.page}
-          setPage={pagination.setPage}
-          pageSize={pagination.pageSize}
-          setPageSize={pagination.setPageSize}
-          pageCount={pagination.pageCount}
-          total={pagination.total}
-        />
-      </div>
+          <div className="rounded-lg border border-border/60">
+            <TablePagination
+              page={pagination.page}
+              setPage={pagination.setPage}
+              pageSize={pagination.pageSize}
+              setPageSize={pagination.setPageSize}
+              pageCount={pagination.pageCount}
+              total={pagination.total}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

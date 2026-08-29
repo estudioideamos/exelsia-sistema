@@ -57,9 +57,11 @@ const SORT_ACCESSORS: Record<string, (op: OperacionRow) => string | number | nul
 export function OperacionesTable({
   operaciones,
   mensajesPorOperacion = {},
+  accionesExtra,
 }: {
   operaciones: OperacionRow[];
   mensajesPorOperacion?: Record<string, ResumenMensajes>;
+  accionesExtra?: React.ReactNode;
 }) {
   const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set());
   const { sorted, sortKey, sortDir, toggleSort } = useSort(operaciones, SORT_ACCESSORS, {
@@ -106,7 +108,7 @@ export function OperacionesTable({
             ? `${seleccionadas.size} seleccionada(s)`
             : `${operaciones.length} operaciones`}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <EliminarSeleccionadosButton
             ids={[...seleccionadas]}
             onEliminar={eliminarOperaciones}
@@ -120,6 +122,7 @@ export function OperacionesTable({
             filas={filasExport}
             disabled={operaciones.length === 0}
           />
+          {accionesExtra}
         </div>
       </div>
 
@@ -141,6 +144,9 @@ export function OperacionesTable({
                   <Checkbox checked={todasSeleccionadas} onCheckedChange={toggleTodas} />
                 </TableHead>
                 <SortableTableHead label="Orden" sortKey="orden" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+                <TableHead className="w-10 text-center">
+                  <MessageCircle className="mx-auto h-3.5 w-3.5" />
+                </TableHead>
                 <SortableTableHead label="Cliente" sortKey="cliente" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
                 <SortableTableHead label="Exportador" sortKey="exportador" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
                 <SortableTableHead label="Origen" sortKey="origen" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -149,9 +155,6 @@ export function OperacionesTable({
                 <SortableTableHead label="Arribo" sortKey="fecha_arribo" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
                 <SortableTableHead label="FOB" sortKey="fob" activeKey={sortKey} dir={sortDir} onSort={toggleSort} className="text-right" />
                 <SortableTableHead label="Estado" sortKey="estado" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
-                <TableHead className="w-10 text-center">
-                  <MessageCircle className="mx-auto h-3.5 w-3.5" />
-                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -180,6 +183,25 @@ export function OperacionesTable({
                         >
                           {op.orden}
                         </Link>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {resumenMsjs ? (
+                          <span
+                            className={
+                              resumenMsjs.ultimoAutorEsCliente
+                                ? "inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary"
+                                : "inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
+                            }
+                            title={
+                              resumenMsjs.ultimoAutorEsCliente
+                                ? "El cliente escribió, esperando respuesta"
+                                : "Sin mensajes nuevos del cliente"
+                            }
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                            {resumenMsjs.cantidad}
+                          </span>
+                        ) : null}
                       </TableCell>
                       <TableCell className="max-w-[220px] truncate">
                         <Link
@@ -213,25 +235,6 @@ export function OperacionesTable({
                         <Badge variant="outline" className={ESTADOS[op.estado].className}>
                           {ESTADOS[op.estado].label}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {resumenMsjs ? (
-                          <span
-                            className={
-                              resumenMsjs.ultimoAutorEsCliente
-                                ? "inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary"
-                                : "inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
-                            }
-                            title={
-                              resumenMsjs.ultimoAutorEsCliente
-                                ? "El cliente escribió, esperando respuesta"
-                                : "Sin mensajes nuevos del cliente"
-                            }
-                          >
-                            <MessageCircle className="h-3 w-3" />
-                            {resumenMsjs.cantidad}
-                          </span>
-                        ) : null}
                       </TableCell>
                     </TableRow>
                   );

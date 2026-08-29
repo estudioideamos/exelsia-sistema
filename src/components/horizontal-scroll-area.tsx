@@ -8,6 +8,8 @@ export function HorizontalScrollArea({ children }: { children: React.ReactNode }
   const trackRef = useRef<HTMLDivElement>(null);
   const [scrollWidth, setScrollWidth] = useState(0);
   const [clientWidth, setClientWidth] = useState(0);
+  const [rect, setRect] = useState({ left: 0, width: 0 });
+  const [visible, setVisible] = useState(false);
   const syncing = useRef(false);
 
   useEffect(() => {
@@ -20,14 +22,25 @@ export function HorizontalScrollArea({ children }: { children: React.ReactNode }
     if (!content) return;
     contentRef.current = content;
 
-    function actualizar() {
+    function actualizarMedidas() {
       setScrollWidth(content!.scrollWidth);
       setClientWidth(content!.clientWidth);
+      const r = content!.getBoundingClientRect();
+      setRect({ left: r.left, width: r.width });
     }
-    actualizar();
+    actualizarMedidas();
 
-    const observer = new ResizeObserver(actualizar);
-    observer.observe(content);
+    const resizeObserver = new ResizeObserver(actualizarMedidas);
+    resizeObserver.observe(content);
+
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0 }
+    );
+    intersectionObserver.observe(content);
+
+    window.addEventListener("resize", actualizarMedidas);
+    window.addEventListener("scroll", actualizarMedidas, true);
 
     function onContentScroll() {
       if (syncing.current) {
@@ -42,7 +55,10 @@ export function HorizontalScrollArea({ children }: { children: React.ReactNode }
     content.addEventListener("scroll", onContentScroll);
 
     return () => {
-      observer.disconnect();
+      resizeObserver.disconnect();
+      intersectionObserver.disconnect();
+      window.removeEventListener("resize", actualizarMedidas);
+      window.removeEventListener("scroll", actualizarMedidas, true);
       content.removeEventListener("scroll", onContentScroll);
     };
   }, []);
@@ -63,14 +79,14 @@ export function HorizontalScrollArea({ children }: { children: React.ReactNode }
   return (
     <div ref={wrapperRef}>
       {children}
-      {necesitaScroll ? (
+      {necesitaScroll && visible ? (
         <div
           ref={trackRef}
           onScroll={onTrackScroll}
-          className="sticky bottom-0 z-10 overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:h-2.5"
-          style={{ scrollbarGutter: "stable" }}
+          className="fixed bottom-0 z-30 overflow-x-auto overflow-y-hidden border-t border-border/60 bg-background/95 backdrop-blur [&::-webkit-scrollbar]:h-2.5"
+          style={{ left: rect.left, width: rect.width, scrollbarGutter: "stable" }}
         >
-          <div style={{ width: scrollWidth, height: 1 }} />
+          <div style={{ width: scrollWidth, height: 10 }} />
         </div>
       ) : null}
     </div>
