@@ -16,7 +16,6 @@ import {
   History,
   ChevronsLeft,
   BookOpen,
-  ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExelsiaLogo } from "@/components/exelsia-logo";
@@ -167,21 +166,6 @@ export function AppSidebar({
           )}
         </div>
       </div>
-
-      {collapsed ? null : (
-        <a
-          href="https://ideamos.com.ar"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex items-center justify-center gap-1.5 border-t border-sidebar-border px-3 py-2 text-[11px] text-sidebar-foreground/35 transition-colors hover:text-sidebar-foreground/70"
-        >
-          Hecho por
-          <span className="font-semibold text-sidebar-foreground/50 transition-colors group-hover:text-primary">
-            Estudio Ideamos
-          </span>
-          <ArrowUpRight className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
-        </a>
-      )}
 
       <button
         onClick={toggle}
