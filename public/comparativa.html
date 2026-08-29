@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exelsia: Antes y Ahora</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/exelsia-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f6f5f2;
+    --surface: #ffffff;
+    --surface-2: #efece5;
+    --line: #ddd9d0;
+    --ink: #1c1a19;
+    --ink-muted: #706a63;
+    --accent: #c81e1e;
+    --accent-soft: #c81e1e14;
+    --good: #0a8f5b;
+    --old: #8b857c;
+    --font-display: "Manrope", system-ui, sans-serif;
+    --font-body: "Source Sans 3", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c0a0c;
+      --surface: #17151a;
+      --surface-2: #201d23;
+      --line: #322e33;
+      --ink: #f2efec;
+      --ink-muted: #9c959a;
+      --accent: #ef4d47;
+      --accent-soft: #ef4d4720;
+      --good: #35d399;
+      --old: #706a70;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px; position: relative; }
+
+  /* ---------- ambient glow ---------- */
+  .glow {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .glow span {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+  }
+  .glow .g1 { top: -220px; left: -160px; width: 560px; height: 560px; background: var(--accent); opacity: 0.16; }
+  .glow .g2 { top: 260px; right: -220px; width: 480px; height: 480px; background: #2dd4bf; opacity: 0.09; }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    border-bottom: 1px solid var(--line);
+    padding: 20px 0;
+  }
+  .masthead-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .masthead img.logo { height: 26px; width: auto; display: block; }
+  .doc-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-muted);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 76px 0 48px; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(34px, 5.4vw, 54px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    max-width: 16ch;
+  }
+  .hero-sub {
+    margin-top: 20px;
+    font-size: 18px;
+    color: var(--ink-muted);
+    max-width: 58ch;
+  }
+
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-top: 44px;
+  }
+  .stat { background: var(--surface); padding: 20px 22px; }
+  .stat .n {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .l { margin-top: 4px; font-size: 13px; color: var(--ink-muted); }
+
+  /* ---------- section ---------- */
+  .section { padding: 56px 0; border-top: 1px solid var(--line); }
+  .section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .section-head h2 {
+    font-size: clamp(24px, 3vw, 30px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .section-tag {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ---------- benefit grid ---------- */
+  .benefits {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .benefit { background: var(--surface); padding: 26px 26px 24px; }
+  .benefit h3 {
+    font-size: 16.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .benefit h3 .mark { color: var(--good); font-family: var(--font-mono); font-size: 15px; }
+  .benefit p { margin: 10px 0 0; font-size: 14.5px; color: var(--ink-muted); max-width: 40ch; }
+
+  /* ---------- manifest comparison ---------- */
+  .manifest { border: 1px solid var(--line); background: var(--surface); }
+  .manifest-head {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    border-bottom: 1px solid var(--line);
+  }
+  .manifest-head > div { padding: 12px 20px; background: var(--surface-2); }
+  .manifest-head .col-old { color: var(--old); }
+  .manifest-head .col-new { color: var(--good); }
+
+  .m-row {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border-bottom: 1px dashed var(--line);
+  }
+  .m-row:last-child { border-bottom: none; }
+  .m-row > div { padding: 18px 20px; background: var(--surface); }
+  .m-topic { font-weight: 600; font-size: 14.5px; display: flex; align-items: center; }
+  .m-old, .m-new { font-size: 14px; color: var(--ink-muted); display: flex; gap: 9px; align-items: flex-start; }
+  .m-new { color: var(--ink); }
+  .m-old::before, .m-new::before { font-family: var(--font-mono); font-size: 13px; line-height: 1.5; flex-shrink: 0; }
+  .m-old::before { content: "✕"; color: var(--old); }
+  .m-new::before { content: "✓"; color: var(--good); }
+
+  /* ---------- cost note ---------- */
+  .cost-note {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    padding: 22px 24px;
+    background: var(--accent-soft);
+    border: 1px solid var(--line);
+    margin-top: 28px;
+  }
+  .cost-note .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    padding-top: 3px;
+    flex-shrink: 0;
+  }
+  .cost-note p { margin: 0; font-size: 14.5px; color: var(--ink-muted); }
+  .cost-note strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- footer ---------- */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 32px 0 56px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .credit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .credit-link .made-by {
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+  .credit-badge {
+    background: #151316;
+    border: 1px solid #2a262b;
+    padding: 7px 12px;
+    display: flex;
+    align-items: center;
+  }
+  .credit-badge img { height: 16px; width: auto; display: block; }
+  footer .stamp {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+  }
+
+  @media (max-width: 720px) {
+    .benefits { grid-template-columns: 1fr; }
+    .manifest-head, .m-row { grid-template-columns: 1fr; }
+    .manifest-head > div:not(:first-child) { display: none; }
+    .m-row { border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+    .m-row > div { padding: 10px 20px; }
+    .m-topic { padding-top: 16px !important; font-size: 13px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; font-family: var(--font-mono); font-weight: 500; }
+    .stat-strip { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { animation: rise 0.7s cubic-bezier(.16,1,.3,1) both; }
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="glow" aria-hidden="true"><span class="g1"></span><span class="g2"></span></div>
+
+<div class="masthead">
+  <div class="wrap masthead-row">
+    <img class="logo" src="/exelsia-logo.png" alt="Exelsia — Foreign Trade Consulting">
+    <div class="doc-meta">Sistema de Operaciones — Comparativa</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="hero reveal">
+    <div class="eyebrow">Antes / Ahora</div>
+    <h1>El sistema de gestión de Exelsia, reconstruido de punta a punta.</h1>
+    <p class="hero-sub">
+      Este documento resume qué cambia entre la plataforma anterior (exelsia.com.ar/clientes) y la
+      nueva, para que quede claro qué gana el equipo y qué gana cada cliente.
+    </p>
+
+    <div class="stat-strip">
+      <div class="stat">
+        <div class="n">2.373</div>
+        <div class="l">operaciones ya cargadas</div>
+      </div>
+      <div class="stat">
+        <div class="n">26</div>
+        <div class="l">clientes con acceso propio</div>
+      </div>
+      <div class="stat">
+        <div class="n">$0</div>
+        <div class="l">costo de hosting hoy</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Lo que más cambia</h2>
+      <div class="section-tag">Cuatro diferencias centrales</div>
+    </div>
+    <div class="benefits">
+      <div class="benefit">
+        <h3><span class="mark">＋</span> Portal propio para cada cliente</h3>
+        <p>Antes no existía forma de que un cliente viera sus operaciones. Ahora cada uno entra con su
+          usuario y ve solo lo suyo: estado, archivos y datos de contacto.</p>
+      </div>
+      <div class="benefit">
+        <h3><span class="mark">＋</span> Avisos automáticos por email</h3>
+        <p>Cuando una operación cambia de estado, el cliente se entera al instante por mail, con una
+          plantilla prolija y editable — antes había que avisar a mano.</p>
+      </div>
+      <div class="benefit">
+        <h3><span class="mark">＋</span> Preguntas dentro de cada operación</h3>
+        <p>El cliente puede consultar algo puntual sobre un envío y queda registrado ahí mismo, visible
+          para el equipo — sin mails sueltos que se pierden.</p>
+      </div>
+      <div class="benefit">
+        <h3><span class="mark">＋</span> Historial de todo lo que pasó</h3>
+        <p>Cada cambio de estado queda registrado con fecha y quién lo hizo. Antes no había forma de
+          reconstruir esa historia.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Comparativa punto por punto</h2>
+      <div class="section-tag">Sistema anterior vs. sistema actual</div>
+    </div>
+
+    <div class="manifest">
+      <div class="manifest-head">
+        <div>Área</div>
+        <div class="col-old">Sistema anterior</div>
+        <div class="col-new">Sistema actual</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-topic">Diseño e interfaz</div>
+        <div class="m-old">Grillas densas, estética de 2010, difícil de leer</div>
+        <div class="m-new">Interfaz clara y moderna, pensada para encontrar todo rápido</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-topic">Acceso del cliente</div>
+        <div class="m-old">No existía — solo lo veía el equipo de Exelsia</div>
+        <div class="m-new">Portal propio: cada cliente ve sus operaciones y archivos</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-topic">Aviso de cambios</div>
+        <div class="m-old">Manual, por teléfono o mail suelto</div>
+        <div class="m-new">Email automático al cambiar el estado, con plantilla editable</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-topic">Archivos y documentación</div>
+        <div class="m-old">Sin un lugar central para subir o encontrar archivos</div>
+        <div class="m-new">Se suben por cliente o por operación puntual, visibles para ambos</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-topic">Comunicación por operación</div>
+        <div class="m-old">No existía un canal formal</div>
+        <div class="m-new">Mensajes dentro de cada operación, entre cliente y equipo</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-topic">Historial y trazabilidad</div>
+        <div class="m-old">Sin registro visible de cambios</div>
+        <div class="m-new">Historial completo: qué cambió, cuándo y quién lo hizo</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-topic">Carga y exportación de datos</div>
+        <div class="m-old">Exportación básica, sin importación masiva real</div>
+        <div class="m-new">Exportar a Excel/CSV, imprimir reportes e importar en lote</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-topic">Seguridad de los datos</div>
+        <div class="m-old">Sin separación clara entre lo que ve cada cliente</div>
+        <div class="m-new">Cada cliente solo puede ver y tocar lo que es suyo, a nivel de base de datos</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-topic">Uso desde el celular</div>
+        <div class="m-old">Pensado únicamente para escritorio</div>
+        <div class="m-new">Se adapta a celular y tablet sin perder funciones</div>
+      </div>
+    </div>
+
+    <div class="cost-note">
+      <div class="tag">Costo</div>
+      <p>
+        Hoy el sistema nuevo funciona a <strong>costo $0</strong>, dentro de los planes gratuitos de
+        los servicios que usa. Si el uso crece mucho, el paso a un plan pago rondaría
+        <strong>USD 45 por mes</strong> — sin migración, solo un cambio de plan.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <a class="credit-link" href="https://ideamos.com.ar" target="_blank" rel="noopener">
+      <span class="made-by">Preparado por</span>
+      <span class="credit-badge"><img src="/ideamos-logo.webp" alt="Estudio Ideamos"></span>
+    </a>
+    <div class="stamp">Exelsia · Sistema de Operaciones</div>
+  </footer>
+
+</div>
+</body>
+</html>

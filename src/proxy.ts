@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   "/apple-icon",
   "/robots.txt",
   "/sitemap.xml",
+  "/comparativa.html",
 ];
 
 export async function proxy(request: NextRequest) {
