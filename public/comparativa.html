@@ -4,8 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exelsia: Antes y Ahora</title>
+<meta name="description" content="Comparativa del sistema anterior de Exelsia contra la nueva plataforma de gestión de operaciones de comercio exterior.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/exelsia-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Exelsia">
+<meta property="og:title" content="Exelsia: Antes y Ahora">
+<meta property="og:description" content="Comparativa del sistema anterior de Exelsia contra la nueva plataforma de gestión de operaciones de comercio exterior.">
+<meta property="og:image" content="https://exelsia-sistema.vercel.app/og-comparativa.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://exelsia-sistema.vercel.app/comparativa.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Exelsia: Antes y Ahora">
+<meta name="twitter:description" content="Comparativa del sistema anterior de Exelsia contra la nueva plataforma de gestión de operaciones de comercio exterior.">
+<meta name="twitter:image" content="https://exelsia-sistema.vercel.app/og-comparativa.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -555,22 +569,23 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 11px 22px;
+    padding: 12px 24px;
     border: 1px solid var(--accent);
-    background: transparent;
-    color: var(--ink);
+    background: var(--accent);
+    color: #fff;
     font-family: var(--font-body);
     font-weight: 600;
     font-size: 13.5px;
     text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease;
+    box-shadow: 0 4px 20px -4px var(--accent-glow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   }
-  .price-cta svg { width: 15px; height: 15px; color: var(--accent); transition: color 0.2s ease; }
+  .price-cta svg { width: 15px; height: 15px; color: #fff; }
   .price-cta:hover {
-    background: var(--accent);
-    color: #fff;
+    background: #ff5c50;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 26px -4px var(--accent-glow);
   }
-  .price-cta:hover svg { color: #fff; }
 
   @media (max-width: 640px) {
     .price-card { padding: 52px 22px; }
