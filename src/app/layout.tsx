@@ -22,8 +22,30 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Exelsia | Sistema de Operaciones",
-  description: "Plataforma de gestión de operaciones de comercio exterior de Exelsia.",
+  metadataBase: new URL("https://exelsia-sistema.vercel.app"),
+  title: {
+    default: "Exelsia | Sistema de Operaciones",
+    template: "%s | Exelsia",
+  },
+  description:
+    "Plataforma interna de Exelsia para la gestión de operaciones, clientes y documentación de comercio exterior.",
+  applicationName: "Exelsia | Sistema de Operaciones",
+  robots: { index: false, follow: false },
+  openGraph: {
+    title: "Exelsia | Sistema de Operaciones",
+    description:
+      "Plataforma interna de Exelsia para la gestión de operaciones, clientes y documentación de comercio exterior.",
+    url: "https://exelsia-sistema.vercel.app",
+    siteName: "Exelsia | Sistema de Operaciones",
+    locale: "es_AR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Exelsia | Sistema de Operaciones",
+    description:
+      "Plataforma interna de Exelsia para la gestión de operaciones, clientes y documentación de comercio exterior.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

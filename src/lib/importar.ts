@@ -1,6 +1,11 @@
 import * as XLSX from "xlsx";
 
+const TAMANO_MAXIMO_BYTES = 10 * 1024 * 1024;
+
 export async function parseArchivoImport(file: File): Promise<Record<string, string>[]> {
+  if (file.size > TAMANO_MAXIMO_BYTES) {
+    throw new Error("El archivo es demasiado grande (máximo 10 MB).");
+  }
   const buffer = await file.arrayBuffer();
   const libro = XLSX.read(buffer, { type: "array" });
   const hoja = libro.Sheets[libro.SheetNames[0]];

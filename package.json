@@ -2,6 +2,7 @@
   "name": "exelsia-sistema",
   "version": "0.1.0",
   "private": true,
+  "author": "Estudio Ideamos <https://ideamos.com.ar>",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
