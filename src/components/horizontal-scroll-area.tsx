@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function HorizontalScrollArea({ children }: { children: React.ReactNode }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -8,9 +8,10 @@ export function HorizontalScrollArea({ children }: { children: React.ReactNode }
   const trackRef = useRef<HTMLDivElement>(null);
   const [scrollWidth, setScrollWidth] = useState(0);
   const [clientWidth, setClientWidth] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
   const [rect, setRect] = useState({ left: 0, width: 0 });
   const [visible, setVisible] = useState(false);
-  const syncing = useRef(false);
+  const dragging = useRef<{ startX: number; startScrollLeft: number } | null>(null);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -25,6 +26,7 @@ export function HorizontalScrollArea({ children }: { children: React.ReactNode }
     function actualizarMedidas() {
       setScrollWidth(content!.scrollWidth);
       setClientWidth(content!.clientWidth);
+      setScrollLeft(content!.scrollLeft);
       const r = content!.getBoundingClientRect();
       setRect({ left: r.left, width: r.width });
     }
@@ -41,40 +43,51 @@ export function HorizontalScrollArea({ children }: { children: React.ReactNode }
 
     window.addEventListener("resize", actualizarMedidas);
     window.addEventListener("scroll", actualizarMedidas, true);
-
-    function onContentScroll() {
-      if (syncing.current) {
-        syncing.current = false;
-        return;
-      }
-      if (trackRef.current) {
-        syncing.current = true;
-        trackRef.current.scrollLeft = content!.scrollLeft;
-      }
-    }
-    content.addEventListener("scroll", onContentScroll);
+    content.addEventListener("scroll", actualizarMedidas);
 
     return () => {
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       window.removeEventListener("resize", actualizarMedidas);
       window.removeEventListener("scroll", actualizarMedidas, true);
-      content.removeEventListener("scroll", onContentScroll);
+      content.removeEventListener("scroll", actualizarMedidas);
     };
   }, []);
 
-  function onTrackScroll() {
-    if (syncing.current) {
-      syncing.current = false;
-      return;
-    }
-    if (trackRef.current && contentRef.current) {
-      syncing.current = true;
-      contentRef.current.scrollLeft = trackRef.current.scrollLeft;
-    }
+  const necesitaScroll = scrollWidth > clientWidth + 1;
+  const thumbWidth = necesitaScroll ? Math.max((clientWidth / scrollWidth) * clientWidth, 40) : 0;
+  const maxThumbOffset = clientWidth - thumbWidth;
+  const maxScroll = scrollWidth - clientWidth;
+  const thumbLeft = maxScroll > 0 ? (scrollLeft / maxScroll) * maxThumbOffset : 0;
+
+  const onThumbPointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    dragging.current = { startX: e.clientX, startScrollLeft: contentRef.current?.scrollLeft ?? 0 };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, []);
+
+  const onThumbPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragging.current || !contentRef.current) return;
+      const deltaX = e.clientX - dragging.current.startX;
+      const deltaScroll = (deltaX / maxThumbOffset) * maxScroll;
+      contentRef.current.scrollLeft = dragging.current.startScrollLeft + deltaScroll;
+    },
+    [maxThumbOffset, maxScroll]
+  );
+
+  function onThumbPointerUp() {
+    dragging.current = null;
   }
 
-  const necesitaScroll = scrollWidth > clientWidth + 1;
+  function onTrackClick(e: React.MouseEvent) {
+    if (!contentRef.current || !trackRef.current) return;
+    if ((e.target as HTMLElement).dataset.thumb) return;
+    const trackRectEl = trackRef.current.getBoundingClientRect();
+    const clickX = e.clientX - trackRectEl.left;
+    const ratio = clickX / trackRectEl.width;
+    contentRef.current.scrollLeft = ratio * maxScroll;
+  }
 
   return (
     <div ref={wrapperRef}>
@@ -82,11 +95,18 @@ export function HorizontalScrollArea({ children }: { children: React.ReactNode }
       {necesitaScroll && visible ? (
         <div
           ref={trackRef}
-          onScroll={onTrackScroll}
-          className="fixed bottom-0 z-30 overflow-x-auto overflow-y-hidden border-t border-border/60 bg-background/95 backdrop-blur [&::-webkit-scrollbar]:h-2.5"
-          style={{ left: rect.left, width: rect.width, scrollbarGutter: "stable" }}
+          onClick={onTrackClick}
+          className="fixed bottom-0 z-30 flex h-4 items-center border-t border-border bg-card/95 shadow-[0_-4px_12px_rgba(0,0,0,0.25)] backdrop-blur"
+          style={{ left: rect.left, width: rect.width }}
         >
-          <div style={{ width: scrollWidth, height: 10 }} />
+          <div
+            data-thumb
+            onPointerDown={onThumbPointerDown}
+            onPointerMove={onThumbPointerMove}
+            onPointerUp={onThumbPointerUp}
+            className="h-2.5 cursor-grab rounded-full bg-primary/70 transition-colors hover:bg-primary active:cursor-grabbing"
+            style={{ width: thumbWidth, transform: `translateX(${thumbLeft}px)` }}
+          />
         </div>
       ) : null}
     </div>

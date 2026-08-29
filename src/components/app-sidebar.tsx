@@ -16,6 +16,7 @@ import {
   History,
   ChevronsLeft,
   BookOpen,
+  ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExelsiaLogo } from "@/components/exelsia-logo";
@@ -99,12 +100,18 @@ export function AppSidebar({
   return (
     <aside
       className={cn(
-        "relative hidden shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex",
+        "relative hidden shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex",
         hydrated ? "transition-[width] duration-200" : "",
         collapsed ? "w-[68px]" : "w-64"
       )}
     >
-      <div className={cn("flex items-center px-5 py-6", collapsed && "justify-center px-0")}>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="animate-drift-a absolute -left-24 -top-32 h-72 w-72 rounded-full bg-primary/25 blur-[90px]" />
+        <div className="animate-drift-b absolute -bottom-32 -right-16 h-64 w-64 rounded-full bg-chart-2/15 blur-[90px]" />
+        <div className="animate-grid-pulse absolute inset-0 bg-[linear-gradient(to_right,transparent_0,transparent_calc(100%-1px),var(--sidebar-border)_100%),linear-gradient(to_bottom,transparent_0,transparent_calc(100%-1px),var(--sidebar-border)_100%)] bg-[size:28px_28px] opacity-[0.15]" />
+      </div>
+
+      <div className={cn("relative flex items-center px-5 py-6", collapsed && "justify-center px-0")}>
         <ExelsiaLogo height={collapsed ? 32 : 46} iconOnly={collapsed} />
       </div>
 
@@ -160,6 +167,21 @@ export function AppSidebar({
           )}
         </div>
       </div>
+
+      {collapsed ? null : (
+        <a
+          href="https://ideamos.com.ar"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center justify-center gap-1.5 border-t border-sidebar-border px-3 py-2 text-[11px] text-sidebar-foreground/35 transition-colors hover:text-sidebar-foreground/70"
+        >
+          Hecho por
+          <span className="font-semibold text-sidebar-foreground/50 transition-colors group-hover:text-primary">
+            Estudio Ideamos
+          </span>
+          <ArrowUpRight className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
+        </a>
+      )}
 
       <button
         onClick={toggle}

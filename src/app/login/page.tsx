@@ -76,6 +76,18 @@ export default function LoginPage() {
             Contactar a soporte
           </Link>
         </p>
+
+        <a
+          href="https://ideamos.com.ar"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group mt-6 flex items-center gap-1.5 text-[11px] text-muted-foreground/60 transition-colors hover:text-foreground"
+        >
+          Hecho por
+          <span className="font-semibold text-muted-foreground transition-colors group-hover:text-primary">
+            Estudio Ideamos
+          </span>
+        </a>
       </div>
     </div>
   );
