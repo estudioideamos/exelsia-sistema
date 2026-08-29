@@ -165,6 +165,17 @@ export function AppSidebar({
             </>
           )}
         </div>
+        {collapsed ? null : (
+          <a
+            href="https://ideamos.com.ar"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1.5 flex items-center justify-center gap-1 text-[10px] leading-none text-sidebar-foreground/30 transition-colors hover:text-sidebar-foreground/60"
+          >
+            Hecho por
+            <span className="font-medium">Estudio Ideamos</span>
+          </a>
+        )}
       </div>
 
       <button
