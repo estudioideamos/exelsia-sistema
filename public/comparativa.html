@@ -113,25 +113,21 @@
   .hero-bg {
     position: absolute;
     top: 50%;
-    left: 46%;
-    right: -12%;
-    height: 82%;
-    transform: translateY(-50%) scale(1.04);
+    left: 42%;
+    right: -8%;
+    height: 92%;
+    transform: translateY(-50%);
     z-index: 0;
     pointer-events: none;
-    animation: hero-in 1.6s cubic-bezier(.16,1,.3,1) both;
+    animation: hero-in 1.8s cubic-bezier(.16,1,.3,1) both;
   }
-  .hero-bg img {
+  .hero-bg canvas {
     width: 100%; height: 100%;
-    object-fit: contain;
     display: block;
-    mix-blend-mode: screen;
-    -webkit-mask-image: radial-gradient(ellipse 66% 62% at 66% 50%, black 30%, transparent 72%);
-    mask-image: radial-gradient(ellipse 66% 62% at 66% 50%, black 30%, transparent 72%);
   }
   @keyframes hero-in {
-    from { opacity: 0; transform: translateY(-50%) scale(1.12); }
-    to { opacity: 1; transform: translateY(-50%) scale(1.04); }
+    from { opacity: 0; transform: translateY(-50%) scale(0.92); }
+    to { opacity: 1; transform: translateY(-50%) scale(1); }
   }
   .hero-content { position: relative; z-index: 1; max-width: 560px; }
   .eyebrow {
@@ -454,8 +450,7 @@
 
   @media (max-width: 860px) {
     .hero { min-height: 0; padding: 100px 0 48px; }
-    .hero-bg { position: relative; top: auto; left: auto; right: auto; height: auto; transform: none; width: 100%; max-width: none; aspect-ratio: 4/3; margin-bottom: 32px; animation: none; opacity: 1; }
-    .hero-bg img { -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, black 40%, transparent 78%); mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, black 40%, transparent 78%); }
+    .hero-bg { position: relative; top: auto; left: auto; right: auto; height: auto; transform: none; width: 100%; max-width: none; aspect-ratio: 1/1; margin-bottom: 24px; animation: none; opacity: 1; }
     .hero-content, .stat-strip { max-width: none; }
     .benefits { grid-template-columns: 1fr; }
     .manifest-head, .m-row { grid-template-columns: 1fr; }
@@ -490,7 +485,7 @@
 
   <section class="hero">
     <div class="hero-bg" aria-hidden="true">
-      <img src="/comparativa-hero.jpg" alt="">
+      <canvas id="globe"></canvas>
     </div>
 
     <div class="hero-content reveal in">
@@ -708,6 +703,204 @@
     }
     requestAnimationFrame(step);
   });
+
+  // Hero: animated 3D wireframe trade globe
+  (function () {
+    var canvas = document.getElementById('globe');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w, h, cx, cy, R, camDist, focal;
+
+    var TILT = -18 * Math.PI / 180;
+    var HUBS = [
+      { name: 'Buenos Aires', lat: -34.6, lon: -58.4, isHome: true },
+      { name: 'Shanghai', lat: 31.2, lon: 121.5 },
+      { name: 'Rotterdam', lat: 51.9, lon: 4.5 },
+      { name: 'Los Angeles', lat: 34.0, lon: -118.2 },
+      { name: 'Dubai', lat: 25.2, lon: 55.3 },
+      { name: 'Hamburgo', lat: 53.5, lon: 10.0 },
+      { name: 'Singapur', lat: 1.3, lon: 103.8 }
+    ];
+    var ROUTES = HUBS.slice(1).map(function (hub, i) {
+      return { a: HUBS[0], b: hub, color: i % 2 === 0 ? 'red' : 'cyan', speed: 0.00028 + (i % 3) * 0.00006, offset: i / (HUBS.length - 1) };
+    });
+
+    function toVec3(lat, lon, radius) {
+      var latR = lat * Math.PI / 180;
+      var lonR = lon * Math.PI / 180;
+      return {
+        x: radius * Math.cos(latR) * Math.sin(lonR),
+        y: radius * Math.sin(latR),
+        z: radius * Math.cos(latR) * Math.cos(lonR)
+      };
+    }
+
+    function rotateY(p, theta) {
+      var s = Math.sin(theta), c = Math.cos(theta);
+      return { x: p.x * c + p.z * s, y: p.y, z: -p.x * s + p.z * c };
+    }
+    function rotateX(p, angle) {
+      var s = Math.sin(angle), c = Math.cos(angle);
+      return { x: p.x, y: p.y * c - p.z * s, z: p.y * s + p.z * c };
+    }
+    function project(p) {
+      var d = p.z + camDist;
+      var scale = focal / d;
+      return { x: cx + p.x * scale, y: cy - p.y * scale, scale: scale, z: p.z };
+    }
+    function depthAlpha(z) {
+      var t = (z + R) / (2 * R); // 0 = nearest camera, 1 = farthest
+      var a = 0.85 - t * 0.78;
+      return Math.max(0.05, Math.min(0.85, a));
+    }
+
+    function resize() {
+      var rect = canvas.parentElement.getBoundingClientRect();
+      w = rect.width; h = rect.height;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx = w / 2; cy = h / 2;
+      R = Math.min(w, h) * 0.36;
+      camDist = R * 3.4;
+      focal = camDist * 1.15;
+    }
+
+    function slerpArc(a3, b3, t, bulge) {
+      var dot = Math.max(-1, Math.min(1, (a3.x * b3.x + a3.y * b3.y + a3.z * b3.z) / (R * R)));
+      var omega = Math.acos(dot);
+      if (omega < 0.0001) omega = 0.0001;
+      var s0 = Math.sin((1 - t) * omega) / Math.sin(omega);
+      var s1 = Math.sin(t * omega) / Math.sin(omega);
+      var x = a3.x * s0 + b3.x * s1;
+      var y = a3.y * s0 + b3.y * s1;
+      var z = a3.z * s0 + b3.z * s1;
+      var len = Math.sqrt(x * x + y * y + z * z) || 1;
+      var lift = 1 + bulge * Math.sin(Math.PI * t);
+      var target = R * lift;
+      return { x: (x / len) * target, y: (y / len) * target, z: (z / len) * target };
+    }
+
+    function transform(p, theta) {
+      return rotateX(rotateY(p, theta), TILT);
+    }
+
+    var latSteps = [];
+    for (var lt = -60; lt <= 60; lt += 30) latSteps.push(lt);
+    var lonSteps = [];
+    for (var ln = -150; ln <= 180; ln += 30) lonSteps.push(ln);
+
+    function drawGridDepth(theta) {
+      var allLines = [];
+      latSteps.forEach(function (lat) {
+        var pts = [];
+        for (var lon = -180; lon <= 180; lon += 5) pts.push(transform(toVec3(lat, lon, R), theta));
+        allLines.push(pts);
+      });
+      lonSteps.forEach(function (lon) {
+        var pts = [];
+        for (var lat = -90; lat <= 90; lat += 5) pts.push(transform(toVec3(lat, lon, R), theta));
+        allLines.push(pts);
+      });
+      allLines.forEach(function (pts) {
+        for (var i = 0; i < pts.length - 1; i++) {
+          var p1 = project(pts[i]), p2 = project(pts[i + 1]);
+          var avgZ = (pts[i].z + pts[i + 1].z) / 2;
+          ctx.strokeStyle = 'rgba(232,231,238,' + depthAlpha(avgZ) * 0.5 + ')';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+      });
+    }
+
+    function drawRoutes(theta, time) {
+      ROUTES.forEach(function (route) {
+        var a3 = transform(toVec3(route.a.lat, route.a.lon, R), 0);
+        var b3 = transform(toVec3(route.b.lat, route.b.lon, R), 0);
+        var steps = 44;
+        var pts = [];
+        for (var i = 0; i <= steps; i++) {
+          var t = i / steps;
+          var raw = slerpArc(
+            toVec3(route.a.lat, route.a.lon, R),
+            toVec3(route.b.lat, route.b.lon, R),
+            t, 0.22
+          );
+          pts.push(transform(raw, theta));
+        }
+        var baseColor = route.color === 'red' ? '255,68,56' : '45,217,232';
+        for (var i = 0; i < pts.length - 1; i++) {
+          var p1 = project(pts[i]), p2 = project(pts[i + 1]);
+          var avgZ = (pts[i].z + pts[i + 1].z) / 2;
+          var a = depthAlpha(avgZ) * 0.55;
+          ctx.strokeStyle = 'rgba(' + baseColor + ',' + a + ')';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+        // traveling pulse
+        var pulseT = (time * route.speed + route.offset) % 1;
+        var rawPulse = slerpArc(
+          toVec3(route.a.lat, route.a.lon, R),
+          toVec3(route.b.lat, route.b.lon, R),
+          pulseT, 0.22
+        );
+        var pp = project(transform(rawPulse, theta));
+        var pulseAlpha = depthAlpha(pp.z);
+        ctx.beginPath();
+        ctx.arc(pp.x, pp.y, 2.6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + baseColor + ',' + Math.min(1, pulseAlpha + 0.25) + ')';
+        ctx.shadowColor = 'rgba(' + baseColor + ',0.9)';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    function drawHubs(theta) {
+      HUBS.forEach(function (hub) {
+        var p = transform(toVec3(hub.lat, hub.lon, R), theta);
+        var pr = project(p);
+        var a = depthAlpha(p.z);
+        var color = hub.isHome ? '255,68,56' : '45,217,232';
+        ctx.beginPath();
+        ctx.arc(pr.x, pr.y, hub.isHome ? 3.4 : 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + color + ',' + Math.min(1, a + 0.3) + ')';
+        ctx.shadowColor = 'rgba(' + color + ',0.8)';
+        ctx.shadowBlur = hub.isHome ? 10 : 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    var theta = 0.6;
+    var startTime = null;
+
+    function frame(ts) {
+      if (!startTime) startTime = ts;
+      var elapsed = ts - startTime;
+      theta += 0.0016;
+      ctx.clearRect(0, 0, w, h);
+      drawGridDepth(theta);
+      drawRoutes(theta, elapsed);
+      drawHubs(theta);
+      if (!reduceMotion) requestAnimationFrame(frame);
+    }
+
+    resize();
+    if (reduceMotion) {
+      frame(0);
+    } else {
+      requestAnimationFrame(frame);
+    }
+    window.addEventListener('resize', resize);
+  })();
 
   // Ambient particle network background
   (function () {
