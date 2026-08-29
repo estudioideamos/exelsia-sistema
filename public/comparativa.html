@@ -531,6 +531,7 @@
     color: var(--ink-muted);
     max-width: 46ch;
   }
+  .price-desc strong { color: var(--ink); font-weight: 700; }
   .price-footer {
     position: relative;
     z-index: 1;
@@ -540,14 +541,17 @@
     align-items: center;
     gap: 18px;
   }
-  .price-deadline {
+  .deadline-label-row {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    border: 1px solid var(--panel-border);
-    background: rgba(7,6,10,0.7);
-    padding: 10px 20px;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
   }
+  .deadline-label-row strong { color: var(--accent); font-weight: 600; }
   .deadline-dot {
     width: 7px; height: 7px;
     border-radius: 50%;
@@ -556,14 +560,44 @@
     animation: pulse-dot 1.8s ease-in-out infinite;
     flex-shrink: 0;
   }
-  .deadline-text {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.03em;
-    color: var(--ink);
+
+  .countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--accent);
+    background: rgba(255,68,56,0.06);
+    padding: 16px 22px;
+    box-shadow: 0 0 30px -8px var(--accent-glow);
   }
-  .deadline-text strong { color: var(--accent); font-weight: 600; }
-  .deadline-text .sep { color: var(--ink-muted); margin: 0 8px; }
+  .countdown-unit { display: flex; flex-direction: column; align-items: center; min-width: 46px; }
+  .countdown-n {
+    font-family: var(--font-mono);
+    font-size: clamp(26px, 4vw, 34px);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    text-shadow: 0 0 18px var(--accent-glow);
+    animation: countdown-pulse 1s ease-in-out infinite;
+  }
+  .countdown-l {
+    margin-top: 2px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+  }
+  .countdown-colon {
+    font-family: var(--font-mono);
+    font-size: clamp(22px, 3.5vw, 28px);
+    color: var(--accent);
+    transform: translateY(-7px);
+  }
+  @keyframes countdown-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.72; }
+  }
 
   .price-cta {
     display: inline-flex;
@@ -589,7 +623,8 @@
 
   @media (max-width: 640px) {
     .price-card { padding: 52px 22px; }
-    .price-deadline { flex-wrap: wrap; justify-content: center; text-align: center; }
+    .countdown { gap: 6px; padding: 14px 14px; }
+    .countdown-unit { min-width: 38px; }
     .price-cta { width: 100%; justify-content: center; }
   }
 
@@ -656,6 +691,8 @@
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
     .live-dot { animation: none; }
+    .countdown-n { animation: none; }
+    .deadline-dot { animation: none; }
   }
 </style>
 </head>
@@ -930,17 +967,24 @@
       <div class="price-label">Inversión única</div>
       <div class="price-value">$700.000 <span>ARS</span></div>
       <p class="price-desc">
-        Todo lo que viste en este documento, en un solo pago: portal de cliente, avisos automáticos,
-        historial, mensajería, importación/exportación y seguridad a nivel de base de datos.
+        Todo lo que viste en este documento, <strong>pago por adelantado</strong>: portal de cliente,
+        avisos automáticos, historial, mensajería, importación/exportación y seguridad a nivel de
+        base de datos.
       </p>
       <div class="price-footer">
-      <div class="price-deadline">
+      <div class="deadline-label-row">
         <div class="deadline-dot"></div>
-        <div class="deadline-text">
-          Oferta válida hasta <strong>1 de septiembre</strong>
-          <span class="sep">·</span>
-          <span id="deadline-countdown">Quedan pocos días</span>
-        </div>
+        <span>Oferta válida hasta <strong>1 de septiembre</strong></span>
+      </div>
+
+      <div class="countdown" id="countdown">
+        <div class="countdown-unit"><span class="countdown-n" data-unit="d">00</span><span class="countdown-l">días</span></div>
+        <span class="countdown-colon">:</span>
+        <div class="countdown-unit"><span class="countdown-n" data-unit="h">00</span><span class="countdown-l">hs</span></div>
+        <span class="countdown-colon">:</span>
+        <div class="countdown-unit"><span class="countdown-n" data-unit="m">00</span><span class="countdown-l">min</span></div>
+        <span class="countdown-colon">:</span>
+        <div class="countdown-unit"><span class="countdown-n" data-unit="s">00</span><span class="countdown-l">seg</span></div>
       </div>
 
       <a class="price-cta" href="https://wa.me/5491168758285?text=Hola!%20Quiero%20congelar%20el%20precio%20de%20la%20oferta%20del%20sistema%20de%20Exelsia%20antes%20de%20que%20venza." target="_blank" rel="noopener">
@@ -962,23 +1006,40 @@
 </div>
 
 <script>
-  // Deadline countdown
+  // Live countdown to the deadline
   (function () {
-    var el = document.getElementById('deadline-countdown');
+    var el = document.getElementById('countdown');
     if (!el) return;
     var now = new Date();
-    var target = new Date(now.getFullYear(), 8, 1); // September 1
-    var msPerDay = 24 * 60 * 60 * 1000;
-    var daysLeft = Math.ceil((target - now) / msPerDay);
-    if (daysLeft > 1) {
-      el.textContent = 'Quedan ' + daysLeft + ' días';
-    } else if (daysLeft === 1) {
-      el.textContent = 'Queda 1 día';
-    } else {
-      var sep = el.previousElementSibling;
-      if (sep && sep.classList.contains('sep')) sep.remove();
-      el.remove();
+    var target = new Date(now.getFullYear(), 8, 1); // September 1, 00:00
+    var nums = {
+      d: el.querySelector('[data-unit="d"]'),
+      h: el.querySelector('[data-unit="h"]'),
+      m: el.querySelector('[data-unit="m"]'),
+      s: el.querySelector('[data-unit="s"]')
+    };
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+
+    function tick() {
+      var diff = target - new Date();
+      if (diff <= 0) {
+        el.innerHTML = '<span class="countdown-l" style="font-size:13px;letter-spacing:0.04em;">Oferta finalizada</span>';
+        return;
+      }
+      var totalSeconds = Math.floor(diff / 1000);
+      var days = Math.floor(totalSeconds / 86400);
+      var hours = Math.floor((totalSeconds % 86400) / 3600);
+      var minutes = Math.floor((totalSeconds % 3600) / 60);
+      var seconds = totalSeconds % 60;
+      nums.d.textContent = pad(days);
+      nums.h.textContent = pad(hours);
+      nums.m.textContent = pad(minutes);
+      nums.s.textContent = pad(seconds);
+      requestAnimationFrame(function () {
+        setTimeout(tick, 1000 - (Date.now() % 1000));
+      });
     }
+    tick();
   })();
 
   // Reveal-on-scroll
