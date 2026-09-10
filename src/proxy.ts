@@ -12,6 +12,7 @@ const PUBLIC_PATHS = [
   "/robots.txt",
   "/sitemap.xml",
   "/comparativa.html",
+  "/api/keepalive",
 ];
 
 export async function proxy(request: NextRequest) {
