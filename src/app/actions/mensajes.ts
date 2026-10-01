@@ -22,10 +22,16 @@ export async function enviarMensajeOperacion(operacionId: string, texto: string,
 
 export async function editarMensajeOperacion(mensajeId: string, texto: string, pathARevalidar: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("No autenticado");
+
   const { error } = await supabase
     .from("operacion_mensajes")
     .update({ texto: texto.trim() })
-    .eq("id", mensajeId);
+    .eq("id", mensajeId)
+    .eq("autor_id", user.id);
   if (error) throw error;
 
   revalidatePath(pathARevalidar);
@@ -33,7 +39,16 @@ export async function editarMensajeOperacion(mensajeId: string, texto: string, p
 
 export async function borrarMensajeOperacion(mensajeId: string, pathARevalidar: string) {
   const supabase = await createClient();
-  const { error } = await supabase.from("operacion_mensajes").delete().eq("id", mensajeId);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("No autenticado");
+
+  const { error } = await supabase
+    .from("operacion_mensajes")
+    .delete()
+    .eq("id", mensajeId)
+    .eq("autor_id", user.id);
   if (error) throw error;
 
   revalidatePath(pathARevalidar);
