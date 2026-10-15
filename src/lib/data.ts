@@ -138,7 +138,7 @@ export async function getArchivosCliente(clienteId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("archivos_cliente")
-    .select("id, nombre_archivo, storage_path, created_at, operaciones(id, orden)")
+    .select("id, nombre_archivo, storage_path, created_at, tipo, operaciones(id, orden)")
     .eq("cliente_id", clienteId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -149,7 +149,7 @@ export async function getArchivosOperacion(operacionId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("archivos_cliente")
-    .select("id, nombre_archivo, storage_path, created_at")
+    .select("id, nombre_archivo, storage_path, created_at, tipo")
     .eq("operacion_id", operacionId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -309,3 +309,36 @@ export async function getResumenMensajesPorOperacion() {
   return resumen;
 }
 
+
+export type DestinatarioCliente = { id: string; email: string; etiqueta: string | null };
+export type AlertaCliente = { estado: string; destinatario_id: string };
+
+export async function getDestinatariosCliente(clienteId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("cliente_destinatarios")
+    .select("id, email, etiqueta")
+    .eq("cliente_id", clienteId)
+    .order("created_at");
+  if (error) throw error;
+  return (data ?? []) as DestinatarioCliente[];
+}
+
+export async function getAlertasCliente(clienteId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("cliente_alertas")
+    .select("estado, destinatario_id")
+    .eq("cliente_id", clienteId);
+  if (error) throw error;
+  return (data ?? []) as AlertaCliente[];
+}
+
+export type DocumentoEtapa = { estado: string; tipo: string };
+
+export async function getDocumentosPorEtapa() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("etapa_documentos").select("estado, tipo");
+  if (error) throw error;
+  return (data ?? []) as DocumentoEtapa[];
+}

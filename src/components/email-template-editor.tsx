@@ -19,13 +19,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EMAIL_VARIABLES, interpolarPlantilla } from "@/lib/email-variables";
+import { EMAIL_VARIABLES, bloqueArchivosHtml, interpolarPlantilla } from "@/lib/email-variables";
 import { guardarPlantillaEmail } from "@/app/(app)/configuracion/actions";
 
 const VALORES_DEMO: Record<string, string> = {
   "{{cliente}}": "Sigma Aldrich de Argentina SRL",
   "{{orden}}": "I1106",
   "{{estado}}": "Despachada",
+  "{{archivos}}": bloqueArchivosHtml([
+    { nombre: "Despacho I1106.pdf", tipo: "Despacho PDF", url: "#" },
+    { nombre: "Factura exterior.pdf", tipo: "Factura Exterior", url: "#" },
+  ]),
   "{{exportador}}": "Sigma Aldrich International GmbH",
   "{{origen}}": "Alemania",
   "{{via}}": "Aéreo",

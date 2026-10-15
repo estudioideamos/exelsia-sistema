@@ -15,8 +15,15 @@ import {
 } from "@/components/ui/table";
 import { ClientePerfilForm } from "@/components/cliente-perfil-form";
 import { ArchivosCliente } from "@/components/archivos-cliente";
+import { AlertasCliente } from "@/components/alertas-cliente";
 import { ESTADOS } from "@/lib/mock-data";
-import { getArchivosCliente, getCliente, getOperacionesPorCliente } from "@/lib/data";
+import {
+  getAlertasCliente,
+  getArchivosCliente,
+  getCliente,
+  getDestinatariosCliente,
+  getOperacionesPorCliente,
+} from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
 
 function initials(name: string) {
@@ -32,9 +39,11 @@ export default async function ClienteDetailPage({
   const cliente = await getCliente(id);
   if (!cliente) notFound();
 
-  const [operacionesCliente, archivosCliente] = await Promise.all([
+  const [operacionesCliente, archivosCliente, destinatarios, alertas] = await Promise.all([
     getOperacionesPorCliente(id),
     getArchivosCliente(id),
+    getDestinatariosCliente(id),
+    getAlertasCliente(id),
   ]);
 
   return (
@@ -69,6 +78,7 @@ export default async function ClienteDetailPage({
               Operaciones ({operacionesCliente.length})
             </TabsTrigger>
             <TabsTrigger value="archivos">Archivos ({archivosCliente.length})</TabsTrigger>
+            <TabsTrigger value="avisos">Avisos ({destinatarios.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="perfil">
@@ -138,6 +148,22 @@ export default async function ClienteDetailPage({
               </CardHeader>
               <CardContent>
                 <ArchivosCliente clienteId={cliente.id} archivosIniciales={archivosCliente} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="avisos">
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle className="text-base">Avisos por cambio de etapa</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AlertasCliente
+                  clienteId={cliente.id}
+                  emailContacto={cliente.email_contacto}
+                  destinatarios={destinatarios}
+                  alertas={alertas}
+                />
               </CardContent>
             </Card>
           </TabsContent>

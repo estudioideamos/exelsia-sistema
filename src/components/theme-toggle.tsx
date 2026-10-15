@@ -16,7 +16,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       className="h-9 w-9 shrink-0"
-      title={resolvedTheme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+      title={mounted && resolvedTheme === "light" ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
       {mounted && resolvedTheme === "light" ? (

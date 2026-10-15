@@ -41,7 +41,37 @@ export const EMAIL_VARIABLES = [
   { token: "{{fecha_mafia_deposito}}", label: "Fecha dep. MAFIA" },
   { token: "{{mafia_depositado}}", label: "MAFIA depositado" },
   { token: "{{fecha_deposito_mafia}}", label: "Fecha de depósito MAFIA" },
+  { token: "{{archivos}}", label: "Documentos de la etapa (links de descarga)" },
 ] as const;
+
+export type ArchivoAviso = { nombre: string; tipo: string | null; url: string };
+
+function escaparHtml(texto: string) {
+  return texto
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+export function bloqueArchivosHtml(archivos: ArchivoAviso[]) {
+  if (archivos.length === 0) return "";
+
+  const items = archivos
+    .map(
+      (a) =>
+        `<li style="margin:0 0 6px;"><a href="${escaparHtml(a.url)}" style="color:#E02B20;text-decoration:underline;">${escaparHtml(a.nombre)}</a>${
+          a.tipo ? ` <span style="color:#777777;">(${escaparHtml(a.tipo)})</span>` : ""
+        }</li>`
+    )
+    .join("");
+
+  return `<div style="margin:20px 0;padding:14px 18px;border:1px solid #e5e5e5;border-radius:8px;font-family:sans-serif;">
+<p style="margin:0 0 10px;font-size:14px;font-weight:bold;">Documentación de tu operación</p>
+<ul style="margin:0;padding-left:18px;font-size:14px;">${items}</ul>
+<p style="margin:10px 0 0;font-size:12px;color:#888888;">Los links de descarga estarán disponibles durante 7 días.</p>
+</div>`;
+}
 
 export function interpolarPlantilla(texto: string, datos: Record<string, string>) {
   return EMAIL_VARIABLES.reduce(

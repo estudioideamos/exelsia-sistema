@@ -6,6 +6,7 @@ import { Ship, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExelsiaLogo } from "@/components/exelsia-logo";
 import { LogoutButton } from "@/components/logout-button";
+import { IdeamosCredit } from "@/components/ideamos-credit";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const nav = [
@@ -84,15 +85,7 @@ export function PortalSidebar({
           </div>
           <LogoutButton />
         </div>
-        <a
-          href="https://ideamos.com.ar"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-1.5 flex items-center justify-center gap-1 text-[10px] leading-none text-sidebar-foreground/30 transition-colors hover:text-sidebar-foreground/60"
-        >
-          Hecho por
-          <span className="font-medium">Estudio Ideamos</span>
-        </a>
+        <IdeamosCredit className="mt-2.5 w-full justify-center text-sidebar-foreground/40" height={12} />
       </div>
     </aside>
   );

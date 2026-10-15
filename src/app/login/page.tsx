@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/login-form";
 import { ExelsiaLogo } from "@/components/exelsia-logo";
+import { IdeamosCredit } from "@/components/ideamos-credit";
 
 const PARTICLES = [
   { left: "6%", size: 3, duration: 14, delay: 0, drift: 30, opacity: 0.5 },
@@ -77,17 +78,7 @@ export default function LoginPage() {
           </Link>
         </p>
 
-        <a
-          href="https://ideamos.com.ar"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group mt-6 flex items-center gap-1.5 text-[11px] text-muted-foreground/60 transition-colors hover:text-foreground"
-        >
-          Hecho por
-          <span className="font-semibold text-muted-foreground transition-colors group-hover:text-primary">
-            Estudio Ideamos
-          </span>
-        </a>
+        <IdeamosCredit className="mt-6" height={16} />
       </div>
     </div>
   );

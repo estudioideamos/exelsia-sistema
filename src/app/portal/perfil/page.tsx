@@ -92,6 +92,11 @@ export default async function PortalPerfilPage() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="truncate text-sm font-medium">{archivo.nombre_archivo}</p>
+                          {archivo.tipo ? (
+                            <Badge variant="outline" className="shrink-0 text-[10px] text-muted-foreground">
+                              {archivo.tipo}
+                            </Badge>
+                          ) : null}
                           {(() => {
                             const op = Array.isArray(archivo.operaciones)
                               ? archivo.operaciones[0]

@@ -5,6 +5,14 @@ import { toast } from "sonner";
 import { Download, FileText, Loader2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { TIPOS_ARCHIVO, TIPO_ARCHIVO_DEFAULT } from "@/lib/tipos-archivo";
 import { createClient } from "@/lib/supabase/client";
 import { formatFecha } from "@/lib/utils";
 
@@ -13,6 +21,7 @@ export type ArchivoRow = {
   nombre_archivo: string;
   storage_path: string;
   created_at: string;
+  tipo?: string | null;
   operaciones?: { id: string; orden: string } | { id: string; orden: string }[] | null;
 };
 
@@ -31,6 +40,7 @@ export function ArchivosCliente({
 }) {
   const [archivos, setArchivos] = useState(archivosIniciales);
   const [uploading, setUploading] = useState(false);
+  const [tipoSubida, setTipoSubida] = useState<string>(TIPO_ARCHIVO_DEFAULT);
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -58,9 +68,10 @@ export function ArchivosCliente({
           operacion_id: operacionId ?? null,
           nombre_archivo: file.name,
           storage_path: path,
+          tipo: tipoSubida,
           subido_por: userData.user?.id,
         })
-        .select("id, nombre_archivo, storage_path, created_at, operaciones(id, orden)")
+        .select("id, nombre_archivo, storage_path, created_at, tipo, operaciones(id, orden)")
         .single();
 
       if (insertError) {
@@ -74,6 +85,18 @@ export function ArchivosCliente({
 
     setUploading(false);
     if (inputRef.current) inputRef.current.value = "";
+  }
+
+  async function cambiarTipo(archivoId: string, tipo: string) {
+    const anterior = archivos.find((a) => a.id === archivoId)?.tipo ?? null;
+    setArchivos((prev) => prev.map((a) => (a.id === archivoId ? { ...a, tipo } : a)));
+
+    const supabase = createClient();
+    const { error } = await supabase.from("archivos_cliente").update({ tipo }).eq("id", archivoId);
+    if (error) {
+      setArchivos((prev) => prev.map((a) => (a.id === archivoId ? { ...a, tipo: anterior } : a)));
+      toast.error("No se pudo cambiar el tipo de archivo", { description: error.message });
+    }
   }
 
   function handleDownload(archivo: ArchivoRow) {
@@ -95,6 +118,23 @@ export function ArchivosCliente({
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-muted-foreground">Tipo de archivo</span>
+        <Select value={tipoSubida} onValueChange={(v) => v && setTipoSubida(v)}>
+          <SelectTrigger className="w-56">
+            <SelectValue>{(value: string) => value}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {TIPOS_ARCHIVO.map((t) => (
+              <SelectItem key={t} value={t}>
+                {t}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="text-xs text-muted-foreground">Se aplica a los archivos que subas ahora.</span>
+      </div>
+
       <div
         className="flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-border/70 px-6 py-8 text-center transition-colors hover:border-primary/40 hover:bg-accent/20"
         onClick={() => inputRef.current?.click()}
@@ -158,14 +198,31 @@ export function ArchivosCliente({
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={isPending}
-                onClick={() => handleDownload(archivo)}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
+              <div className="flex shrink-0 items-center gap-2">
+                <Select
+                  value={archivo.tipo ?? undefined}
+                  onValueChange={(v) => v && cambiarTipo(archivo.id, v)}
+                >
+                  <SelectTrigger className="h-8 w-44 text-xs">
+                    <SelectValue placeholder="Sin tipo">{(value: string) => value}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIPOS_ARCHIVO.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={isPending}
+                  onClick={() => handleDownload(archivo)}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>

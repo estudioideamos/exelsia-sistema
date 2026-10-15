@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { EstadoOperacion } from "@/lib/mock-data";
 import { enviarAvisoCambioEstado } from "@/lib/email";
+import { resolverDestinatariosAviso } from "@/lib/destinatarios";
+import { archivosParaAviso } from "@/lib/archivos-aviso";
 
 export async function actualizarEstadoOperacion(operacionId: string, nuevoEstado: EstadoOperacion) {
   const supabase = await createClient();
@@ -49,10 +51,21 @@ export async function actualizarEstadoOperacion(operacionId: string, nuevoEstado
   const incoterm = operacionAnterior?.incoterms as unknown as { nombre: string } | null;
   const divisa = operacionAnterior?.divisas as unknown as { nombre: string } | null;
 
+  const { emails, modo } = await resolverDestinatariosAviso(
+    supabase,
+    operacionAnterior?.cliente_id ?? "",
+    nuevoEstado,
+    cliente?.email_contacto ?? null
+  );
+
+  const archivos =
+    cliente && emails.length > 0 ? await archivosParaAviso(supabase, operacionId, nuevoEstado) : [];
+
   let emailEnviado = false;
-  if (cliente?.email_contacto) {
+  if (cliente && emails.length > 0) {
     emailEnviado = await enviarAvisoCambioEstado({
-      email: cliente.email_contacto,
+      email: emails,
+      archivos,
       cliente: cliente.nombre,
       orden: operacionAnterior?.orden ?? "",
       nuevoEstado,
@@ -102,7 +115,7 @@ export async function actualizarEstadoOperacion(operacionId: string, nuevoEstado
   revalidatePath("/operaciones");
   revalidatePath("/dashboard");
 
-  return { emailEnviado, tieneEmailContacto: Boolean(cliente?.email_contacto) };
+  return { emailEnviado, destinatarios: emails.length, modo, archivos: archivos.length };
 }
 
 export async function guardarNotasInternas(operacionId: string, comentarios: string) {

@@ -1,11 +1,12 @@
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { ESTADOS, type EstadoOperacion } from "@/lib/mock-data";
-import { interpolarPlantilla } from "@/lib/email-variables";
+import { bloqueArchivosHtml, interpolarPlantilla, type ArchivoAviso } from "@/lib/email-variables";
 import { formatFecha } from "@/lib/utils";
 
 export type DatosAvisoOperacion = {
-  email: string;
+  email: string | string[];
+  archivos?: ArchivoAviso[];
   cliente: string;
   orden: string;
   nuevoEstado: EstadoOperacion;
@@ -120,7 +121,14 @@ export async function enviarAvisoCambioEstado(datos: DatosAvisoOperacion) {
     "{{fecha_mafia_deposito}}": formatFecha(datos.fechaMafiaDeposito),
     "{{mafia_depositado}}": num(datos.mafiaDepositado),
     "{{fecha_deposito_mafia}}": formatFecha(datos.fechaDepositoMafia),
+    "{{archivos}}": bloqueArchivosHtml(datos.archivos ?? []),
   };
+
+  // Si la plantilla no ubica {{archivos}}, los links van al final del mail.
+  let cuerpoFinal = interpolarPlantilla(cuerpo, valores);
+  if (!cuerpo.includes("{{archivos}}")) {
+    cuerpoFinal += valores["{{archivos}}"];
+  }
 
   const resend = new Resend(apiKey);
 
@@ -128,7 +136,7 @@ export async function enviarAvisoCambioEstado(datos: DatosAvisoOperacion) {
     from: process.env.RESEND_FROM_EMAIL || "Exelsia <onboarding@resend.dev>",
     to: datos.email,
     subject: interpolarPlantilla(asunto, valores),
-    html: interpolarPlantilla(cuerpo, valores),
+    html: cuerpoFinal,
   });
 
   if (error) {

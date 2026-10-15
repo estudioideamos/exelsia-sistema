@@ -32,21 +32,28 @@ export function EstadoSelector({
 
     startTransition(async () => {
       try {
-        const { emailEnviado, tieneEmailContacto } = await actualizarEstadoOperacion(
+        const { emailEnviado, destinatarios, modo, archivos } = await actualizarEstadoOperacion(
           operacionId,
           value
         );
 
         if (emailEnviado) {
           toast.success(`Estado actualizado a "${ESTADOS[value].label}"`, {
-            description: `Se envió un email a ${cliente} avisando el cambio de estado.`,
+            description:
+              (destinatarios > 1
+                ? `Se envió el aviso a ${destinatarios} casillas de ${cliente}`
+                : `Se envió un email a ${cliente} avisando el cambio de estado`) +
+              (archivos > 0 ? ` con ${archivos} documento${archivos > 1 ? "s" : ""}.` : "."),
             icon: <Mail className="h-4 w-4" />,
           });
         } else {
           toast.success(`Estado actualizado a "${ESTADOS[value].label}"`, {
-            description: tieneEmailContacto
-              ? "No se pudo enviar el email (falta configurar Resend)."
-              : "El cliente no tiene un email de contacto cargado.",
+            description:
+              destinatarios > 0
+                ? "No se pudo enviar el email (falta configurar Resend)."
+                : modo === "configurado"
+                  ? "Este cliente no tiene avisos activados para esta etapa."
+                  : "El cliente no tiene un email de contacto cargado.",
             icon: <MailWarning className="h-4 w-4" />,
           });
         }

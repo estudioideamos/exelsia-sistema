@@ -235,6 +235,21 @@ export default function ManualPage() {
                 archivos (los generales y los que se subieron dentro de cada operación puntual,
                 identificados con la orden correspondiente).
               </Punto>
+              <Punto titulo="Tipo de archivo">
+                Al subir un archivo elegís su tipo (BL, Factura exterior, Despacho PDF, Packing
+                List, Swift, etc.; por defecto &ldquo;Otros&rdquo;). Se puede cambiar después,
+                archivo por archivo, desde el desplegable de cada fila. El cliente ve el tipo en
+                su portal.
+              </Punto>
+              <Punto titulo="Avisos del cliente (pestaña Avisos)">
+                Cada cliente puede tener varias casillas de mail (por ejemplo administración y
+                logística), cada una con un rol opcional. En la grilla elegís, etapa por etapa, a
+                qué casillas se envía el aviso: cada aviso llega solo a las casillas tildadas. Si
+                una etapa no tiene ninguna tildada, el cliente no recibe aviso al llegar a ella.
+                Mientras un cliente no tenga casillas cargadas, todo sigue yendo a su mail de
+                contacto. La primera casilla que agregás arranca con todas las etapas tildadas,
+                para no cortar los avisos que ya salían.
+              </Punto>
             </Seccion>
 
             <Seccion id="catalogos" icono={Globe2} titulo="Catálogos">
@@ -258,6 +273,15 @@ export default function ManualPage() {
               <Punto titulo="Avisos por email">
                 Cada uno de los 6 estados de una operación tiene su propia plantilla de mail.
                 Elegís el estado en el desplegable y editás asunto y cuerpo.
+              </Punto>
+              <Punto titulo="Documentos que acompañan cada aviso">
+                Debajo de las plantillas hay una grilla con cada tipo de archivo y cada etapa.
+                Lo que tildes ahí viaja en el mail: al cambiar una operación de etapa, el aviso
+                incluye links de descarga de los archivos de esa operación cuyo tipo esté
+                tildado para esa etapa. Los links vencen a los 7 días. Con la variable{" "}
+                <span className="font-mono text-xs">{"{{archivos}}"}</span> elegís dónde
+                aparecen dentro del mail; si no la usás, quedan al final. Sin nada tildado, el
+                aviso sale sin documentos.
               </Punto>
               <Punto titulo="Editor Visual o HTML">
                 Podés escribir con el editor visual (como un Word simple: negrita, cursiva,

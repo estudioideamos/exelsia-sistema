@@ -88,7 +88,12 @@ export default async function PortalOperacionDetailPage({
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                           <FileText className="h-4 w-4" />
                         </div>
-                        <p className="truncate text-sm font-medium">{archivo.nombre_archivo}</p>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{archivo.nombre_archivo}</p>
+                          {archivo.tipo ? (
+                            <p className="text-xs text-muted-foreground">{archivo.tipo}</p>
+                          ) : null}
+                        </div>
                       </div>
                       <ArchivoDescargaButton storagePath={archivo.storage_path} />
                     </div>
