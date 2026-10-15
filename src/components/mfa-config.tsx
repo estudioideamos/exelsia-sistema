@@ -43,6 +43,7 @@ export function MfaConfig() {
 
     const { data, error } = await supabase.auth.mfa.enroll({
       factorType: "totp",
+      issuer: "Exelsia",
       friendlyName: "Exelsia",
     });
     setTrabajando(false);
