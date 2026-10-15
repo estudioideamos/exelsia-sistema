@@ -1,4 +1,5 @@
 import { formatFecha } from "@/lib/utils";
+import { esc } from "@/lib/html";
 import { ESTADOS, type EstadoOperacion } from "@/lib/mock-data";
 
 type OperacionResumen = {
@@ -25,12 +26,12 @@ export function exportarEstadoCuenta(
   const filas = operaciones
     .map(
       (op) => `<tr>
-        <td>${op.orden}</td>
-        <td>${op.exportador}</td>
-        <td>${op.origen}</td>
-        <td>${op.via}</td>
+        <td>${esc(op.orden)}</td>
+        <td>${esc(op.exportador)}</td>
+        <td>${esc(op.origen)}</td>
+        <td>${esc(op.via)}</td>
         <td>${formatFecha(op.fecha_arribo)}</td>
-        <td>${op.divisa} ${Number(op.fob ?? 0).toLocaleString("es-AR", { minimumFractionDigits: 2 })}</td>
+        <td>${esc(op.divisa)} ${Number(op.fob ?? 0).toLocaleString("es-AR", { minimumFractionDigits: 2 })}</td>
         <td>${ESTADOS[op.estado].label}</td>
       </tr>`
     )
@@ -40,7 +41,7 @@ export function exportarEstadoCuenta(
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<title>Estado de cuenta — ${clienteNombre}</title>
+<title>Estado de cuenta — ${esc(clienteNombre)}</title>
 <style>
   body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #111; margin: 32px; }
   .header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
@@ -59,7 +60,7 @@ export function exportarEstadoCuenta(
     <img src="https://exelsia-sistema.vercel.app/exelsia-logo.png" alt="Exelsia" />
   </div>
   <h1>Estado de cuenta</h1>
-  <p class="meta">${clienteNombre} · ${operaciones.length} operación(es) · ${formatFecha(new Date().toISOString())}</p>
+  <p class="meta">${esc(clienteNombre)} · ${operaciones.length} operación(es) · ${formatFecha(new Date().toISOString())}</p>
   <p class="total">FOB total: USD ${fobTotal.toLocaleString("es-AR", { minimumFractionDigits: 2 })}</p>
   <table>
     <thead><tr><th>Orden</th><th>Exportador</th><th>Origen</th><th>Vía</th><th>Arribo</th><th>FOB</th><th>Estado</th></tr></thead>

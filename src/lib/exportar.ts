@@ -1,4 +1,5 @@
 import { formatFecha } from "@/lib/utils";
+import { esc } from "@/lib/html";
 
 export type ColumnaExport = { label: string; key: string };
 
@@ -56,19 +57,19 @@ export function exportarDashboardPdf(data: DashboardReporteData) {
 
   const filaKpi = (k: (typeof data.kpis)[number]) => `
     <div class="kpi">
-      <p class="kpi-label">${k.label}</p>
-      <p class="kpi-value">${k.value}</p>
-      <p class="kpi-hint">${k.hint}</p>
+      <p class="kpi-label">${esc(k.label)}</p>
+      <p class="kpi-value">${esc(k.value)}</p>
+      <p class="kpi-hint">${esc(k.hint)}</p>
     </div>`;
 
   const filaEstado = (e: (typeof data.estadoDistribucion)[number]) => `
-    <tr><td>${e.label}</td><td>${e.cantidad}</td><td>${e.porcentaje}%</td></tr>`;
+    <tr><td>${esc(e.label)}</td><td>${esc(e.cantidad)}</td><td>${esc(e.porcentaje)}%</td></tr>`;
 
   const filaCliente = (c: (typeof data.clientesConActividad)[number]) => `
-    <tr><td>${c.nombre}</td><td>${c.cuit}</td><td>${c.operacionesActivas}</td></tr>`;
+    <tr><td>${esc(c.nombre)}</td><td>${esc(c.cuit)}</td><td>${esc(c.operacionesActivas)}</td></tr>`;
 
   const filaOperacion = (o: (typeof data.operacionesRecientes)[number]) => `
-    <tr><td>${o.orden}</td><td>${o.cliente}</td><td>${o.estado}</td></tr>`;
+    <tr><td>${esc(o.orden)}</td><td>${esc(o.cliente)}</td><td>${esc(o.estado)}</td></tr>`;
 
   ventana.document.write(`<!DOCTYPE html>
 <html lang="es">
@@ -141,7 +142,7 @@ export function imprimirSeleccionados(
     .map(
       (fila) =>
         `<tr>${columnas
-          .map((col) => `<td>${String(fila[col.key] ?? "")}</td>`)
+          .map((col) => `<td>${esc(fila[col.key])}</td>`)
           .join("")}</tr>`
     )
     .join("");
@@ -150,7 +151,7 @@ export function imprimirSeleccionados(
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<title>${titulo}</title>
+<title>${esc(titulo)}</title>
 <style>
   body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #111; margin: 32px; }
   .header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
@@ -169,10 +170,10 @@ export function imprimirSeleccionados(
   <div class="header">
     <img src="https://exelsia-sistema.vercel.app/exelsia-logo.png" alt="Exelsia" />
   </div>
-  <h1>${titulo}</h1>
+  <h1>${esc(titulo)}</h1>
   <p class="meta">${filas.length} registro(s) · ${formatFecha(new Date().toISOString())}</p>
   <table>
-    <thead><tr>${columnas.map((c) => `<th>${c.label}</th>`).join("")}</tr></thead>
+    <thead><tr>${columnas.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr></thead>
     <tbody>${filasHtml}</tbody>
   </table>
   <script>window.onload = () => window.print();</script>
