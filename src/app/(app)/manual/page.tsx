@@ -310,7 +310,9 @@ export default function ManualPage() {
               </p>
               <Punto titulo="Qué ve el cliente">
                 Sus operaciones con seguimiento en tiempo real, gráfico de sus estados, sus
-                archivos, su perfil de contacto y el hilo de mensajes de cada operación.
+                archivos, su perfil de contacto y el hilo de mensajes de cada operación. En
+                &ldquo;Mi perfil&rdquo; también ve, solo de lectura, a qué casillas se le envía
+                el aviso de cada etapa; para cambiarlo contacta a Exelsia.
               </Punto>
               <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 p-3">
                 <FileSpreadsheet className="h-4 w-4 shrink-0 text-primary" />

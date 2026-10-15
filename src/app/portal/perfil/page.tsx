@@ -4,8 +4,15 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArchivoDescargaButton } from "@/components/archivo-descarga-button";
-import { Mail, Phone, MapPin, FileText } from "lucide-react";
-import { getArchivosCliente, getCliente, getPerfilActual } from "@/lib/data";
+import { Check, Mail, Phone, MapPin, FileText } from "lucide-react";
+import {
+  getAlertasCliente,
+  getArchivosCliente,
+  getCliente,
+  getDestinatariosCliente,
+  getPerfilActual,
+} from "@/lib/data";
+import { ESTADOS } from "@/lib/mock-data";
 import { formatFecha } from "@/lib/utils";
 
 function initials(name: string) {
@@ -16,10 +23,13 @@ export default async function PortalPerfilPage() {
   const { profile } = await getPerfilActual();
   if (!profile?.cliente_id) redirect("/login");
 
-  const [cliente, archivos] = await Promise.all([
+  const [cliente, archivos, destinatarios, alertas] = await Promise.all([
     getCliente(profile.cliente_id),
     getArchivosCliente(profile.cliente_id),
+    getDestinatariosCliente(profile.cliente_id),
+    getAlertasCliente(profile.cliente_id),
   ]);
+  const activas = new Set(alertas.map((a) => `${a.estado}|${a.destinatario_id}`));
 
   if (!cliente) redirect("/login");
 
@@ -68,6 +78,68 @@ export default async function PortalPerfilPage() {
             <p className="pt-2 text-xs text-muted-foreground">
               Si algún dato está desactualizado, contactá a tu asesor de Exelsia para
               corregirlo.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60">
+          <CardHeader>
+            <CardTitle className="text-base">Avisos por cambio de etapa</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            {destinatarios.length === 0 ? (
+              <p className="text-muted-foreground">
+                Los avisos de cada cambio de etapa se envían a tu mail de contacto
+                {cliente.email_contacto ? (
+                  <span className="font-medium text-foreground"> ({cliente.email_contacto})</span>
+                ) : null}
+                .
+              </p>
+            ) : (
+              <div className="overflow-x-auto rounded-lg border border-border/60">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-muted/40 text-left">
+                      <th className="px-3 py-2 font-medium">Etapa</th>
+                      {destinatarios.map((d) => (
+                        <th key={d.id} className="px-3 py-2 font-medium">
+                          <span className="block">{d.email}</span>
+                          {d.etiqueta ? (
+                            <span className="block text-xs font-normal text-muted-foreground">
+                              {d.etiqueta}
+                            </span>
+                          ) : null}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(ESTADOS).map(([estado, { label, className }]) => (
+                      <tr key={estado} className="border-t border-border/60">
+                        <td className="px-3 py-2">
+                          <Badge variant="outline" className={className}>
+                            {label}
+                          </Badge>
+                        </td>
+                        {destinatarios.map((d) => (
+                          <td key={d.id} className="px-3 py-2">
+                            {activas.has(`${estado}|${d.id}`) ? (
+                              <Check className="h-4 w-4 text-emerald-500" aria-label="Recibe el aviso" />
+                            ) : (
+                              <span className="text-muted-foreground/50" aria-label="No recibe el aviso">
+                                —
+                              </span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Si querés cambiar a qué casillas llegan los avisos, contactá a tu asesor de Exelsia.
             </p>
           </CardContent>
         </Card>
