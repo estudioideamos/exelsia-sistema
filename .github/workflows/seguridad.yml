@@ -1,0 +1,32 @@
+name: Control de seguridad y calidad
+
+on:
+  schedule:
+    - cron: "30 11 * * 1"
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  control:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Vulnerabilidades conocidas en dependencias
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Revisión de código (lint)
+        run: npm run lint
+
+      - name: Verificación de tipos
+        run: npx tsc --noEmit
