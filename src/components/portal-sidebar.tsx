@@ -9,7 +9,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { IdeamosCredit } from "@/components/ideamos-credit";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-const nav = [
+export const nav = [
   { href: "/portal", label: "Mis operaciones", icon: Ship },
   { href: "/portal/perfil", label: "Mi perfil", icon: UserRound },
 ];

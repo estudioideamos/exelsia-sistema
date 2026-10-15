@@ -26,14 +26,14 @@ import {
   AvatarFallback,
 } from "@/components/ui/avatar";
 
-const nav = [
+export const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/operaciones", label: "Operaciones", icon: Ship },
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/historial", label: "Historial", icon: History },
 ];
 
-const catalogos = [
+export const catalogos = [
   { href: "/catalogos/paises", label: "Países", icon: Globe2 },
   { href: "/catalogos/divisas", label: "Divisas", icon: Coins },
   { href: "/catalogos/incoterms", label: "Incoterms", icon: FileSignature },

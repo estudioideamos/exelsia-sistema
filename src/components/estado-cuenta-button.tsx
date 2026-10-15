@@ -36,7 +36,8 @@ export function EstadoCuentaButton({
   return (
     <Button variant="outline" size="sm" onClick={generar} disabled={disabled || cargando}>
       {cargando ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
-      Estado de cuenta
+      <span className="hidden sm:inline">Estado de cuenta</span>
+      <span className="sr-only sm:hidden">Estado de cuenta</span>
     </Button>
   );
 }

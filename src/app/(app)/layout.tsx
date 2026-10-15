@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
+import { MobileNav } from "@/components/mobile-nav";
 import { getPerfilActual } from "@/lib/data";
 
 export default async function AppGroupLayout({ children }: { children: React.ReactNode }) {
@@ -17,7 +18,17 @@ export default async function AppGroupLayout({ children }: { children: React.Rea
           role: profile?.role ?? "cliente",
         }}
       />
-      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <MobileNav
+          variant="admin"
+          user={{
+            email: user.email ?? "",
+            nombre: profile?.nombre ?? null,
+            etiqueta: "Administrador",
+          }}
+        />
+        {children}
+      </div>
     </div>
   );
 }

@@ -16,14 +16,16 @@ export function AppTopbar({
   children?: React.ReactNode;
 }) {
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-border/60 bg-background/80 px-6 py-4 backdrop-blur-xl">
-      <div>
-        <h1 className="text-lg font-semibold tracking-tight text-foreground">{title}</h1>
+    <header className="sticky top-14 z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl sm:px-6 sm:py-4 lg:top-0">
+      <div className="min-w-0">
+        <h1 className="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg">
+          {title}
+        </h1>
         {description ? (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="truncate text-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         {children}
         <GlobalSearch
           operacionesBasePath={notificationsBasePath}

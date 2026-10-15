@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PortalSidebar } from "@/components/portal-sidebar";
+import { MobileNav } from "@/components/mobile-nav";
 import { getPerfilActual } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,7 +26,17 @@ export default async function PortalLayout({ children }: { children: React.React
           clienteNombre: cliente?.nombre ?? "",
         }}
       />
-      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <MobileNav
+          variant="portal"
+          user={{
+            email: user.email ?? "",
+            nombre: profile.nombre,
+            etiqueta: cliente?.nombre ?? "Cliente",
+          }}
+        />
+        {children}
+      </div>
     </div>
   );
 }
