@@ -1,7 +1,8 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { EstadoOperacion } from "@/lib/mock-data";
 
-export async function getPerfilActual() {
+export const getPerfilActual = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -15,7 +16,7 @@ export async function getPerfilActual() {
     .maybeSingle();
 
   return { user, profile };
-}
+});
 
 export type OperacionRow = {
   id: string;
@@ -84,26 +85,139 @@ const OPERACION_SELECT = `
   cliente:clientes(nombre)
 `;
 
+const LISTA_SELECT = `
+  id, orden, cliente_id, exportador_id, pais_origen_id, via_id, incoterm_id, divisa_id,
+  awb_bl, fecha_arribo, forwarder, factura, fob, estado, descripcion,
+  divisa:divisas(nombre),
+  incoterm:incoterms(nombre),
+  via:vias(nombre),
+  exportador:exportadores(nombre),
+  pais_origen:paises(nombre),
+  cliente:clientes(nombre)
+`;
+
 const PAGE_SIZE = 1000;
 
-export async function getOperaciones() {
-  const supabase = await createClient();
-  const todas: OperacionRow[] = [];
-  let desde = 0;
+// Clave de la tabla -> columna por la que ordena la base de datos.
+const COLUMNAS_ORDEN: Record<string, string> = {
+  orden: "orden",
+  cliente: "cliente(nombre)",
+  exportador: "exportador(nombre)",
+  origen: "pais_origen(nombre)",
+  via: "via(nombre)",
+  fecha_arribo: "fecha_arribo",
+  fob: "fob",
+  estado: "estado",
+};
 
-  while (true) {
-    const { data, error } = await supabase
+export type OrdenOperaciones = { sort: string; dir: "asc" | "desc" };
+export const ORDEN_OPERACIONES_DEFAULT: OrdenOperaciones = { sort: "fecha_arribo", dir: "desc" };
+export const SORT_KEYS_OPERACIONES = Object.keys(COLUMNAS_ORDEN);
+
+export function normalizarOrden(sort: string | undefined, dir: string | undefined): OrdenOperaciones {
+  return {
+    sort: sort && sort in COLUMNAS_ORDEN ? sort : ORDEN_OPERACIONES_DEFAULT.sort,
+    dir: dir === "asc" || dir === "desc" ? dir : ORDEN_OPERACIONES_DEFAULT.dir,
+  };
+}
+
+export async function getOperacionesPagina(page: number, size: number, orden: OrdenOperaciones) {
+  const supabase = await createClient();
+
+  async function pedir(pagina: number) {
+    const desde = (pagina - 1) * size;
+    return supabase
       .from("operaciones")
-      .select(OPERACION_SELECT)
-      .order("created_at", { ascending: false })
-      .range(desde, desde + PAGE_SIZE - 1);
-    if (error) throw error;
-    todas.push(...((data ?? []) as unknown as OperacionRow[]));
-    if (!data || data.length < PAGE_SIZE) break;
-    desde += PAGE_SIZE;
+      .select(LISTA_SELECT, { count: "exact" })
+      .order(COLUMNAS_ORDEN[orden.sort], { ascending: orden.dir === "asc", nullsFirst: false })
+      .order("id")
+      .range(desde, desde + size - 1);
   }
 
+  const primera = await pedir(Math.max(1, page));
+  if (primera.error) throw primera.error;
+
+  const total = primera.count ?? 0;
+  const ultima = Math.max(1, Math.ceil(total / size));
+  if (page <= ultima) {
+    return {
+      rows: (primera.data ?? []) as unknown as OperacionRow[],
+      total,
+      page: Math.max(1, page),
+    };
+  }
+
+  const fallback = await pedir(ultima);
+  if (fallback.error) throw fallback.error;
+  return { rows: (fallback.data ?? []) as unknown as OperacionRow[], total, page: ultima };
+}
+
+// Para exportar todo: trae las páginas en paralelo, ya ordenadas.
+export async function getTodasOperaciones(orden: OrdenOperaciones) {
+  const supabase = await createClient();
+
+  const { count, error: errorConteo } = await supabase
+    .from("operaciones")
+    .select("id", { count: "exact", head: true });
+  if (errorConteo) throw errorConteo;
+
+  const paginas = Math.ceil((count ?? 0) / PAGE_SIZE);
+  const lotes = await Promise.all(
+    Array.from({ length: paginas }, (_, i) =>
+      supabase
+        .from("operaciones")
+        .select(LISTA_SELECT)
+        .order(COLUMNAS_ORDEN[orden.sort], { ascending: orden.dir === "asc", nullsFirst: false })
+        .order("id")
+        .range(i * PAGE_SIZE, i * PAGE_SIZE + PAGE_SIZE - 1)
+    )
+  );
+
+  const todas: OperacionRow[] = [];
+  for (const lote of lotes) {
+    if (lote.error) throw lote.error;
+    todas.push(...((lote.data ?? []) as unknown as OperacionRow[]));
+  }
   return todas;
+}
+
+// Solo lo necesario para los indicadores del dashboard: estado y FOB de cada operación.
+export async function getResumenOperaciones() {
+  const supabase = await createClient();
+
+  const { count, error: errorConteo } = await supabase
+    .from("operaciones")
+    .select("id", { count: "exact", head: true });
+  if (errorConteo) throw errorConteo;
+
+  const paginas = Math.ceil((count ?? 0) / PAGE_SIZE);
+  const lotes = await Promise.all(
+    Array.from({ length: paginas }, (_, i) =>
+      supabase
+        .from("operaciones")
+        .select("estado, fob")
+        .order("id")
+        .range(i * PAGE_SIZE, i * PAGE_SIZE + PAGE_SIZE - 1)
+    )
+  );
+
+  const filas: { estado: EstadoOperacion; fob: number | null }[] = [];
+  for (const lote of lotes) {
+    if (lote.error) throw lote.error;
+    filas.push(...((lote.data ?? []) as { estado: EstadoOperacion; fob: number | null }[]));
+  }
+  return filas;
+}
+
+export async function getOperacionesRecientes(cantidad: number) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("operaciones")
+    .select(LISTA_SELECT)
+    .order("created_at", { ascending: false })
+    .limit(cantidad);
+  if (error) throw error;
+  return (data ?? []) as unknown as OperacionRow[];
 }
 
 export async function getOperacion(id: string) {
@@ -282,12 +396,16 @@ export type ResumenMensajes = {
   ultimoAutorEsCliente: boolean;
 };
 
-export async function getResumenMensajesPorOperacion() {
+export async function getResumenMensajesPorOperacion(operacionIds?: string[]) {
   const supabase = await createClient();
-  const { data: mensajes } = await supabase
+  if (operacionIds && operacionIds.length === 0) return new Map<string, ResumenMensajes>();
+
+  let consulta = supabase
     .from("operacion_mensajes")
     .select("operacion_id, autor_id, created_at")
     .order("created_at", { ascending: true });
+  if (operacionIds) consulta = consulta.in("operacion_id", operacionIds);
+  const { data: mensajes } = await consulta;
 
   const filas = mensajes ?? [];
   const autorIds = [...new Set(filas.map((f) => f.autor_id))];

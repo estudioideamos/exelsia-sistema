@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ESTADOS, type EstadoOperacion } from "@/lib/mock-data";
+import { getTodasOperaciones, normalizarOrden } from "@/lib/data";
+import { formatFecha } from "@/lib/utils";
 
 function optionalId(formData: FormData, key: string) {
   const value = String(formData.get(key) ?? "");
@@ -222,4 +224,19 @@ export async function eliminarOperaciones(ids: string[]) {
   revalidatePath("/operaciones");
   revalidatePath("/dashboard");
   revalidatePath("/historial");
+}
+
+export async function obtenerFilasExportOperaciones(sort: string, dir: string) {
+  const operaciones = await getTodasOperaciones(normalizarOrden(sort, dir));
+  return operaciones.map((op) => ({
+    orden: op.orden,
+    cliente: op.cliente?.nombre ?? "",
+    exportador: op.exportador?.nombre ?? "",
+    origen: op.pais_origen?.nombre ?? "",
+    via: op.via?.nombre ?? "",
+    awb_bl: op.awb_bl ?? "",
+    fecha_arribo: formatFecha(op.fecha_arribo),
+    fob: op.fob ?? "",
+    estado: ESTADOS[op.estado]?.label ?? op.estado,
+  }));
 }

@@ -45,6 +45,7 @@ export function TablePagination({
   pageCount,
   total,
   position = "bottom",
+  mostrarTodo = true,
 }: {
   page: number;
   setPage: (page: number) => void;
@@ -53,6 +54,7 @@ export function TablePagination({
   pageCount: number;
   total: number;
   position?: "top" | "bottom";
+  mostrarTodo?: boolean;
 }) {
   if (total === 0) return null;
 
@@ -87,7 +89,7 @@ export function TablePagination({
                   {size}
                 </SelectItem>
               ))}
-              <SelectItem value="todo">Todo</SelectItem>
+              {mostrarTodo ? <SelectItem value="todo">Todo</SelectItem> : null}
             </SelectContent>
           </Select>
         </div>

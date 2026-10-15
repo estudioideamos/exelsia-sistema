@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,12 +17,12 @@ import {
 import { ExportMenu } from "@/components/export-menu";
 import { EliminarSeleccionadosButton } from "@/components/eliminar-seleccionados-button";
 import { HorizontalScrollArea } from "@/components/horizontal-scroll-area";
-import { TablePagination, usePagination } from "@/components/table-pagination";
-import { useSort, SortableTableHead } from "@/components/sortable-header";
+import { TablePagination } from "@/components/table-pagination";
+import { SortableTableHead, type SortDir } from "@/components/sortable-header";
 import { ESTADOS } from "@/lib/mock-data";
 import type { OperacionRow, ResumenMensajes } from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
-import { eliminarOperaciones } from "@/app/(app)/operaciones/actions";
+import { eliminarOperaciones, obtenerFilasExportOperaciones } from "@/app/(app)/operaciones/actions";
 import { Plane, Ship as ShipIcon, Truck, MessageCircle } from "lucide-react";
 
 const viaIcon: Record<string, typeof Plane> = {
@@ -43,34 +44,49 @@ const COLUMNAS_EXPORT = [
   { label: "Estado", key: "estado" },
 ];
 
-const SORT_ACCESSORS: Record<string, (op: OperacionRow) => string | number | null> = {
-  orden: (op) => op.orden,
-  cliente: (op) => op.cliente?.nombre ?? null,
-  exportador: (op) => op.exportador?.nombre ?? null,
-  origen: (op) => op.pais_origen?.nombre ?? null,
-  via: (op) => op.via?.nombre ?? null,
-  fecha_arribo: (op) => op.fecha_arribo,
-  fob: (op) => op.fob,
-  estado: (op) => ESTADOS[op.estado]?.label ?? op.estado,
-};
-
 export function OperacionesTable({
   operaciones,
+  total,
+  page,
+  pageSize,
+  sortKey,
+  sortDir,
   mensajesPorOperacion = {},
   accionesExtra,
 }: {
   operaciones: OperacionRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  sortKey: string;
+  sortDir: SortDir;
   mensajesPorOperacion?: Record<string, ResumenMensajes>;
   accionesExtra?: React.ReactNode;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
   const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set());
-  const { sorted, sortKey, sortDir, toggleSort } = useSort(operaciones, SORT_ACCESSORS, {
-    key: "fecha_arribo",
-    dir: "desc",
-  });
-  const pagination = usePagination(sorted);
 
-  const todasSeleccionadas = operaciones.length > 0 && seleccionadas.size === operaciones.length;
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const todasSeleccionadas =
+    operaciones.length > 0 && operaciones.every((o) => seleccionadas.has(o.id));
+
+  function irA(cambios: { page?: number; size?: number; sort?: string; dir?: SortDir }) {
+    const params = new URLSearchParams({
+      page: String(cambios.page ?? page),
+      size: String(cambios.size ?? pageSize),
+      sort: cambios.sort ?? sortKey,
+      dir: cambios.dir ?? sortDir,
+    });
+    setSeleccionadas(new Set());
+    startTransition(() => router.push(`${pathname}?${params.toString()}`));
+  }
+
+  function toggleSort(key: string) {
+    if (key === sortKey) irA({ page: 1, dir: sortDir === "asc" ? "desc" : "asc" });
+    else irA({ page: 1, sort: key, dir: "asc" });
+  }
 
   function toggleTodas() {
     setSeleccionadas(todasSeleccionadas ? new Set() : new Set(operaciones.map((o) => o.id)));
@@ -85,20 +101,33 @@ export function OperacionesTable({
     });
   }
 
-  const filasExport = useMemo(() => {
-    const base = seleccionadas.size > 0 ? sorted.filter((o) => seleccionadas.has(o.id)) : sorted;
-    return base.map((op) => ({
-      orden: op.orden,
-      cliente: op.cliente?.nombre ?? "",
-      exportador: op.exportador?.nombre ?? "",
-      origen: op.pais_origen?.nombre ?? "",
-      via: op.via?.nombre ?? "",
-      awb_bl: op.awb_bl ?? "",
-      fecha_arribo: formatFecha(op.fecha_arribo),
-      fob: op.fob ?? "",
-      estado: ESTADOS[op.estado]?.label ?? op.estado,
-    }));
-  }, [sorted, seleccionadas]);
+  const filasSeleccionadas = useMemo(
+    () =>
+      operaciones
+        .filter((o) => seleccionadas.has(o.id))
+        .map((op) => ({
+          orden: op.orden,
+          cliente: op.cliente?.nombre ?? "",
+          exportador: op.exportador?.nombre ?? "",
+          origen: op.pais_origen?.nombre ?? "",
+          via: op.via?.nombre ?? "",
+          awb_bl: op.awb_bl ?? "",
+          fecha_arribo: formatFecha(op.fecha_arribo),
+          fob: op.fob ?? "",
+          estado: ESTADOS[op.estado]?.label ?? op.estado,
+        })),
+    [operaciones, seleccionadas]
+  );
+
+  const paginacion = {
+    page,
+    setPage: (p: number) => irA({ page: p }),
+    pageSize,
+    setPageSize: (size: number) => irA({ page: 1, size }),
+    pageCount,
+    total,
+    mostrarTodo: false,
+  };
 
   return (
     <div className="space-y-3">
@@ -106,7 +135,7 @@ export function OperacionesTable({
         <p className="text-sm text-muted-foreground">
           {seleccionadas.size > 0
             ? `${seleccionadas.size} seleccionada(s)`
-            : `${operaciones.length} operaciones`}
+            : `${total} operaciones`}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <EliminarSeleccionadosButton
@@ -119,23 +148,18 @@ export function OperacionesTable({
             nombreArchivo="operaciones"
             titulo="Operaciones"
             columnas={COLUMNAS_EXPORT}
-            filas={filasExport}
-            disabled={operaciones.length === 0}
+            filas={seleccionadas.size > 0 ? filasSeleccionadas : undefined}
+            obtenerFilas={() => obtenerFilasExportOperaciones(sortKey, sortDir)}
+            disabled={total === 0}
           />
           {accionesExtra}
         </div>
       </div>
 
-      <Card className="border-border/60 overflow-hidden py-0">
-        <TablePagination
-          position="top"
-          page={pagination.page}
-          setPage={pagination.setPage}
-          pageSize={pagination.pageSize}
-          setPageSize={pagination.setPageSize}
-          pageCount={pagination.pageCount}
-          total={pagination.total}
-        />
+      <Card
+        className={`border-border/60 overflow-hidden py-0 transition-opacity ${isPending ? "opacity-60" : ""}`}
+      >
+        <TablePagination position="top" {...paginacion} />
         <HorizontalScrollArea>
           <Table>
             <TableHeader>
@@ -158,14 +182,14 @@ export function OperacionesTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {operaciones.length === 0 ? (
+              {total === 0 ? (
                 <TableRow>
                   <TableCell colSpan={11} className="py-10 text-center text-muted-foreground">
                     Todavía no hay operaciones cargadas.
                   </TableCell>
                 </TableRow>
               ) : (
-                pagination.paginated.map((op) => {
+                operaciones.map((op) => {
                   const Icon = (op.via?.nombre && viaIcon[op.via.nombre]) || ShipIcon;
                   const resumenMsjs = mensajesPorOperacion[op.id];
                   return (
@@ -243,14 +267,7 @@ export function OperacionesTable({
             </TableBody>
           </Table>
         </HorizontalScrollArea>
-        <TablePagination
-          page={pagination.page}
-          setPage={pagination.setPage}
-          pageSize={pagination.pageSize}
-          setPageSize={pagination.setPageSize}
-          pageCount={pagination.pageCount}
-          total={pagination.total}
-        />
+        <TablePagination {...paginacion} />
       </Card>
     </div>
   );

@@ -37,9 +37,10 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Valida la firma del token localmente (sin viajar a Supabase en cada request).
+  // La verificación contra el servidor la hacen los layouts con getUser().
+  const { data: sesion } = await supabase.auth.getClaims();
+  const user = sesion?.claims ? { id: sesion.claims.sub } : null;
 
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));

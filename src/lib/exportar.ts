@@ -1,4 +1,3 @@
-import * as XLSX from "xlsx";
 import { formatFecha } from "@/lib/utils";
 
 export type ColumnaExport = { label: string; key: string };
@@ -13,11 +12,12 @@ function filasAObjetos(columnas: ColumnaExport[], filas: Record<string, unknown>
   });
 }
 
-export function exportarExcel(
+export async function exportarExcel(
   nombreArchivo: string,
   columnas: ColumnaExport[],
   filas: Record<string, unknown>[]
 ) {
+  const XLSX = await import("xlsx");
   const datos = filasAObjetos(columnas, filas);
   const hoja = XLSX.utils.json_to_sheet(datos);
   const libro = XLSX.utils.book_new();
@@ -25,11 +25,12 @@ export function exportarExcel(
   XLSX.writeFile(libro, `${nombreArchivo}.xlsx`);
 }
 
-export function exportarCsv(
+export async function exportarCsv(
   nombreArchivo: string,
   columnas: ColumnaExport[],
   filas: Record<string, unknown>[]
 ) {
+  const XLSX = await import("xlsx");
   const datos = filasAObjetos(columnas, filas);
   const hoja = XLSX.utils.json_to_sheet(datos);
   const csv = XLSX.utils.sheet_to_csv(hoja);

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { EstadoDistributionChart } from "@/components/estado-distribution-chart";
 import { DashboardExportButton } from "@/components/dashboard-export-button";
 import { ESTADOS, type EstadoOperacion } from "@/lib/mock-data";
-import { getClientes, getOperaciones } from "@/lib/data";
+import { getClientes, getOperacionesRecientes, getResumenOperaciones } from "@/lib/data";
 import { ArrowUpRight, Package, Ship, Users, Clock } from "lucide-react";
 
 const ORDEN_ESTADOS: EstadoOperacion[] = [
@@ -19,9 +19,12 @@ const ORDEN_ESTADOS: EstadoOperacion[] = [
 ];
 
 export default async function DashboardPage() {
-  const [operaciones, clientes] = await Promise.all([getOperaciones(), getClientes()]);
+  const [operaciones, recientes, clientes] = await Promise.all([
+    getResumenOperaciones(),
+    getOperacionesRecientes(8),
+    getClientes(),
+  ]);
 
-  const recientes = operaciones.slice(0, 8);
   const fobTotal = operaciones.reduce((acc, o) => acc + Number(o.fob ?? 0), 0);
 
   const kpis = [
