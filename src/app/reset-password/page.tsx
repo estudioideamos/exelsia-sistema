@@ -62,8 +62,12 @@ export default function ResetPasswordPage() {
     const password = String(formData.get("password"));
     const confirmacion = String(formData.get("confirmacion"));
 
-    if (password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres.");
+    if (password.length < 10) {
+      setError("La contraseña debe tener al menos 10 caracteres.");
+      return;
+    }
+    if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      setError("Tiene que incluir al menos una minúscula, una mayúscula y un número.");
       return;
     }
     if (password !== confirmacion) {
@@ -127,7 +131,7 @@ export default function ResetPasswordPage() {
             <>
               <CardHeader className="space-y-1 text-center">
                 <CardTitle className="text-2xl">Nueva contraseña</CardTitle>
-                <CardDescription>Elegí una contraseña nueva para tu cuenta.</CardDescription>
+                <CardDescription>Elegí una contraseña nueva para tu cuenta: mínimo 10 caracteres, con mayúscula, minúscula y número.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form className="space-y-4" onSubmit={handleSubmit}>
@@ -141,7 +145,7 @@ export default function ResetPasswordPage() {
                         type="password"
                         placeholder="••••••••"
                         required
-                        minLength={8}
+                        minLength={10}
                         autoComplete="new-password"
                         className="pl-9"
                       />
@@ -157,7 +161,7 @@ export default function ResetPasswordPage() {
                         type="password"
                         placeholder="••••••••"
                         required
-                        minLength={8}
+                        minLength={10}
                         autoComplete="new-password"
                         className="pl-9"
                       />
