@@ -51,7 +51,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === "/login") {
+  // /login?mfa=1 es el paso del código de verificación: el usuario ya tiene sesión
+  // pero todavía no completó el segundo factor.
+  if (user && pathname === "/login" && request.nextUrl.searchParams.get("mfa") !== "1") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

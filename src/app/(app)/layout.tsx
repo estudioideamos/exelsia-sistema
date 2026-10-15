@@ -4,9 +4,10 @@ import { MobileNav } from "@/components/mobile-nav";
 import { getPerfilActual } from "@/lib/data";
 
 export default async function AppGroupLayout({ children }: { children: React.ReactNode }) {
-  const { user, profile } = await getPerfilActual();
+  const { user, profile, mfaPendiente } = await getPerfilActual();
 
   if (!user) redirect("/login");
+  if (mfaPendiente) redirect("/login?mfa=1");
   if (profile?.role === "cliente") redirect("/portal");
 
   return (

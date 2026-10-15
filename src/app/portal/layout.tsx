@@ -5,8 +5,9 @@ import { getPerfilActual } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
-  const { user, profile } = await getPerfilActual();
+  const { user, profile, mfaPendiente } = await getPerfilActual();
   if (!user) redirect("/login");
+  if (mfaPendiente) redirect("/login?mfa=1");
   if (profile?.role === "admin") redirect("/dashboard");
   if (!profile?.cliente_id) redirect("/login");
 

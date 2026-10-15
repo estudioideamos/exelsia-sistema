@@ -16,7 +16,12 @@ const PARTICLES = [
   { left: "92%", size: 3, duration: 16, delay: 7, drift: -10, opacity: 0.5 },
 ];
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mfa?: string }>;
+}) {
+  const { mfa } = await searchParams;
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden bg-background">
       {/* ambient glow background */}
@@ -69,7 +74,7 @@ export default function LoginPage() {
           <ExelsiaLogo height={40} />
         </div>
 
-        <LoginForm />
+        <LoginForm pedirCodigo={mfa === "1"} />
 
         <p className="mt-8 text-center text-xs text-muted-foreground">
           ¿Problemas para ingresar?{" "}

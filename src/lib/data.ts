@@ -7,7 +7,12 @@ export const getPerfilActual = cache(async () => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { user: null, profile: null };
+  if (!user) return { user: null, profile: null, mfaPendiente: false };
+
+  // Con verificación en dos pasos activada, una sesión que solo pasó por la contraseña
+  // (aal1) no puede usar el sistema hasta ingresar el código.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  const mfaPendiente = aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2";
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -15,7 +20,7 @@ export const getPerfilActual = cache(async () => {
     .eq("id", user.id)
     .maybeSingle();
 
-  return { user, profile };
+  return { user, profile, mfaPendiente };
 });
 
 export type OperacionRow = {

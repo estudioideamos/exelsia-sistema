@@ -1,6 +1,7 @@
 import { AppTopbar } from "@/components/app-topbar";
 import { DocumentosPorEtapa } from "@/components/documentos-por-etapa";
 import { EmailTemplatesManager } from "@/components/email-templates-manager";
+import { MfaConfig } from "@/components/mfa-config";
 import { getDocumentosPorEtapa } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,6 +16,7 @@ export default async function ConfiguracionPage() {
     <>
       <AppTopbar title="Configuración" description="Ajustes generales del sistema" />
       <div className="flex-1 space-y-6 p-6">
+        <MfaConfig />
         <EmailTemplatesManager plantillas={plantillas ?? []} />
         <DocumentosPorEtapa documentos={documentos} />
       </div>
