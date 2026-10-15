@@ -734,8 +734,8 @@
         <div class="l">clientes con acceso propio</div>
       </div>
       <div class="stat">
-        <div class="n">$0</div>
-        <div class="l">costo de hosting hoy</div>
+        <div class="n">~USD 45</div>
+        <div class="l">infraestructura por mes, estimado</div>
       </div>
     </div>
   </section>
@@ -885,17 +885,20 @@
       <div class="tag">Costo de hosting</div>
       <div>
         <p>
-          Hoy el sistema nuevo funciona a <strong>costo $0</strong>, dentro de los planes gratuitos de
-          los servicios que usa. Cada uno pasa a pago recién si el uso crece mucho — nunca implica
-          migrar nada, solo cambiar de plan en un clic.
+          La plataforma se apoya en tres servicios de infraestructura. Pueden arrancar en su plan
+          gratuito, pero <strong>para uso diario con clientes recomendamos contratar los planes
+          pagos de base de datos y hosting</strong>: no es por el volumen de datos, que es mínimo,
+          sino por las condiciones del plan gratuito. Son costos mensuales aparte del desarrollo y
+          se pagan directamente al proveedor. Cambiar de plan es un clic, sin migrar nada.
         </p>
         <ul class="stack-list">
           <li>
             <div class="stack-item-head">
               <strong>Vercel</strong>
-              <span class="stack-price">USD 20<span>/mes si hace falta</span></span>
+              <span class="stack-price">USD 20<span>/mes · recomendado</span></span>
             </div>
             <p>Aloja la plataforma y la mantiene siempre online</p>
+            <p><strong>Por qué:</strong> el plan gratuito es para uso personal, no comercial; el proveedor podría limitarlo o suspenderlo. El pago permite uso comercial e incluye soporte.</p>
             <div class="usage-bar">
               <div class="usage-bar-track"><div class="usage-bar-fill" style="width:3%"></div></div>
               <span class="usage-bar-label">Tráfico actual muy por debajo del límite gratuito (100 GB/mes)</span>
@@ -904,9 +907,10 @@
           <li>
             <div class="stack-item-head">
               <strong>Supabase</strong>
-              <span class="stack-price">USD 25<span>/mes si hace falta</span></span>
+              <span class="stack-price">USD 25<span>/mes · recomendado</span></span>
             </div>
             <p>Base de datos, login y almacenamiento de archivos</p>
+            <p><strong>Por qué:</strong> el plan gratuito se apaga solo tras unos días sin movimiento (mientras tanto nadie puede entrar) y no hace copias de seguridad. El pago no se apaga e incluye copias diarias.</p>
             <div class="usage-bar">
               <div class="usage-bar-track"><div class="usage-bar-fill" style="width:1%"></div></div>
               <span class="usage-bar-label">Base de datos: &lt;1% de 500 MB usados (2.373 operaciones cargadas)</span>
@@ -919,12 +923,13 @@
           <li>
             <div class="stack-item-head">
               <strong>Resend</strong>
-              <span class="stack-price">USD 20<span>/mes (+3.000 emails)</span></span>
+              <span class="stack-price">USD 20<span>/mes · si se supera el tope</span></span>
             </div>
             <p>Envío de los emails automáticos por cambio de estado</p>
+            <p><strong>Por qué:</strong> el plan gratuito permite hasta 100 mails por día y 3.000 por mes; un día de mucha actividad puede superarlo y los avisos que sobren no se envían.</p>
             <div class="usage-bar">
               <div class="usage-bar-track"><div class="usage-bar-fill" style="width:2%"></div></div>
-              <span class="usage-bar-label">Muy por debajo del límite gratuito de 3.000 emails/mes</span>
+              <span class="usage-bar-label">Volumen mensual muy por debajo del tope de 3.000 (el tope diario es de 100)</span>
             </div>
           </li>
         </ul>
@@ -970,7 +975,7 @@
         Todo lo que viste en este documento, <strong>pago por adelantado</strong>: portal de cliente,
         avisos automáticos, historial, mensajería, importación/exportación y seguridad a nivel de
         base de datos.
-      </p>
+       No incluye los servicios mensuales de infraestructura detallados más arriba.</p>
       <div class="price-footer">
       <div class="deadline-label-row">
         <div class="deadline-dot"></div>
