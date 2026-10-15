@@ -226,8 +226,8 @@ export async function eliminarOperaciones(ids: string[]) {
   revalidatePath("/historial");
 }
 
-export async function obtenerFilasExportOperaciones(sort: string, dir: string) {
-  const operaciones = await getTodasOperaciones(normalizarOrden(sort, dir));
+export async function obtenerFilasExportOperaciones(sort: string, dir: string, clienteId?: string) {
+  const operaciones = await getTodasOperaciones(normalizarOrden(sort, dir), clienteId);
   return operaciones.map((op) => ({
     orden: op.orden,
     cliente: op.cliente?.nombre ?? "",

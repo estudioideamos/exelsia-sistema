@@ -121,14 +121,19 @@ export function normalizarOrden(sort: string | undefined, dir: string | undefine
   };
 }
 
-export async function getOperacionesPagina(page: number, size: number, orden: OrdenOperaciones) {
+export async function getOperacionesPagina(
+  page: number,
+  size: number,
+  orden: OrdenOperaciones,
+  clienteId?: string
+) {
   const supabase = await createClient();
 
   async function pedir(pagina: number) {
     const desde = (pagina - 1) * size;
-    return supabase
-      .from("operaciones")
-      .select(LISTA_SELECT, { count: "exact" })
+    let consulta = supabase.from("operaciones").select(LISTA_SELECT, { count: "exact" });
+    if (clienteId) consulta = consulta.eq("cliente_id", clienteId);
+    return consulta
       .order(COLUMNAS_ORDEN[orden.sort], { ascending: orden.dir === "asc", nullsFirst: false })
       .order("id")
       .range(desde, desde + size - 1);
@@ -153,24 +158,24 @@ export async function getOperacionesPagina(page: number, size: number, orden: Or
 }
 
 // Para exportar todo: trae las páginas en paralelo, ya ordenadas.
-export async function getTodasOperaciones(orden: OrdenOperaciones) {
+export async function getTodasOperaciones(orden: OrdenOperaciones, clienteId?: string) {
   const supabase = await createClient();
 
-  const { count, error: errorConteo } = await supabase
-    .from("operaciones")
-    .select("id", { count: "exact", head: true });
+  let conteo = supabase.from("operaciones").select("id", { count: "exact", head: true });
+  if (clienteId) conteo = conteo.eq("cliente_id", clienteId);
+  const { count, error: errorConteo } = await conteo;
   if (errorConteo) throw errorConteo;
 
   const paginas = Math.ceil((count ?? 0) / PAGE_SIZE);
   const lotes = await Promise.all(
-    Array.from({ length: paginas }, (_, i) =>
-      supabase
-        .from("operaciones")
-        .select(LISTA_SELECT)
+    Array.from({ length: paginas }, (_, i) => {
+      let consulta = supabase.from("operaciones").select(LISTA_SELECT);
+      if (clienteId) consulta = consulta.eq("cliente_id", clienteId);
+      return consulta
         .order(COLUMNAS_ORDEN[orden.sort], { ascending: orden.dir === "asc", nullsFirst: false })
         .order("id")
-        .range(i * PAGE_SIZE, i * PAGE_SIZE + PAGE_SIZE - 1)
-    )
+        .range(i * PAGE_SIZE, i * PAGE_SIZE + PAGE_SIZE - 1);
+    })
   );
 
   const todas: OperacionRow[] = [];
@@ -182,23 +187,21 @@ export async function getTodasOperaciones(orden: OrdenOperaciones) {
 }
 
 // Solo lo necesario para los indicadores del dashboard: estado y FOB de cada operación.
-export async function getResumenOperaciones() {
+export async function getResumenOperaciones(clienteId?: string) {
   const supabase = await createClient();
 
-  const { count, error: errorConteo } = await supabase
-    .from("operaciones")
-    .select("id", { count: "exact", head: true });
+  let conteo = supabase.from("operaciones").select("id", { count: "exact", head: true });
+  if (clienteId) conteo = conteo.eq("cliente_id", clienteId);
+  const { count, error: errorConteo } = await conteo;
   if (errorConteo) throw errorConteo;
 
   const paginas = Math.ceil((count ?? 0) / PAGE_SIZE);
   const lotes = await Promise.all(
-    Array.from({ length: paginas }, (_, i) =>
-      supabase
-        .from("operaciones")
-        .select("estado, fob")
-        .order("id")
-        .range(i * PAGE_SIZE, i * PAGE_SIZE + PAGE_SIZE - 1)
-    )
+    Array.from({ length: paginas }, (_, i) => {
+      let consulta = supabase.from("operaciones").select("estado, fob");
+      if (clienteId) consulta = consulta.eq("cliente_id", clienteId);
+      return consulta.order("id").range(i * PAGE_SIZE, i * PAGE_SIZE + PAGE_SIZE - 1);
+    })
   );
 
   const filas: { estado: EstadoOperacion; fob: number | null }[] = [];
@@ -268,17 +271,6 @@ export async function getArchivosOperacion(operacionId: string) {
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data ?? [];
-}
-
-export async function getOperacionesPorCliente(clienteId: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("operaciones")
-    .select(OPERACION_SELECT)
-    .eq("cliente_id", clienteId)
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []) as unknown as OperacionRow[];
 }
 
 export type HistorialRow = {

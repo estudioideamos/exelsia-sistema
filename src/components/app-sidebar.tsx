@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -42,6 +42,20 @@ const catalogos = [
 ];
 
 const STORAGE_KEY = "exelsia_sidebar_collapsed";
+const EVENTO_MENU = "exelsia-sidebar-change";
+
+function suscribirseAlMenu(avisar: () => void) {
+  window.addEventListener(EVENTO_MENU, avisar);
+  window.addEventListener("storage", avisar);
+  return () => {
+    window.removeEventListener(EVENTO_MENU, avisar);
+    window.removeEventListener("storage", avisar);
+  };
+}
+
+function leerMenuColapsado() {
+  return window.localStorage.getItem(STORAGE_KEY) === "1";
+}
 
 function NavLink({
   href,
@@ -74,20 +88,16 @@ export function AppSidebar({
 }: {
   user: { email: string; nombre: string | null; role: "admin" | "cliente" };
 }) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setCollapsed(window.localStorage.getItem(STORAGE_KEY) === "1");
-    setHydrated(true);
-  }, []);
+  const collapsed = useSyncExternalStore(suscribirseAlMenu, leerMenuColapsado, () => false);
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   function toggle() {
-    setCollapsed((prev) => {
-      const next = !prev;
-      window.localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
-      return next;
-    });
+    window.localStorage.setItem(STORAGE_KEY, collapsed ? "0" : "1");
+    window.dispatchEvent(new Event(EVENTO_MENU));
   }
 
   const initials = (user.nombre || user.email)

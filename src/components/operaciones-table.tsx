@@ -51,6 +51,7 @@ export function OperacionesTable({
   pageSize,
   sortKey,
   sortDir,
+  clienteId,
   mensajesPorOperacion = {},
   accionesExtra,
 }: {
@@ -60,6 +61,7 @@ export function OperacionesTable({
   pageSize: number;
   sortKey: string;
   sortDir: SortDir;
+  clienteId?: string;
   mensajesPorOperacion?: Record<string, ResumenMensajes>;
   accionesExtra?: React.ReactNode;
 }) {
@@ -79,6 +81,7 @@ export function OperacionesTable({
       sort: cambios.sort ?? sortKey,
       dir: cambios.dir ?? sortDir,
     });
+    if (clienteId) params.set("cliente", clienteId);
     setSeleccionadas(new Set());
     startTransition(() => router.push(`${pathname}?${params.toString()}`));
   }
@@ -149,7 +152,7 @@ export function OperacionesTable({
             titulo="Operaciones"
             columnas={COLUMNAS_EXPORT}
             filas={seleccionadas.size > 0 ? filasSeleccionadas : undefined}
-            obtenerFilas={() => obtenerFilasExportOperaciones(sortKey, sortDir)}
+            obtenerFilas={() => obtenerFilasExportOperaciones(sortKey, sortDir, clienteId)}
             disabled={total === 0}
           />
           {accionesExtra}

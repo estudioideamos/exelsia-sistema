@@ -12,8 +12,15 @@ import {
 } from "@/components/ui/table";
 import { EstadoDistributionChart } from "@/components/estado-distribution-chart";
 import { EstadoCuentaButton } from "@/components/estado-cuenta-button";
+import { PaginacionServidor } from "@/components/paginacion-servidor";
 import { ESTADOS } from "@/lib/mock-data";
-import { getCliente, getOperacionesPorCliente, getPerfilActual } from "@/lib/data";
+import {
+  getCliente,
+  getOperacionesPagina,
+  getPerfilActual,
+  getResumenOperaciones,
+  ORDEN_OPERACIONES_DEFAULT,
+} from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
 import { Plane, Ship as ShipIcon, Truck, Package, Clock } from "lucide-react";
 
@@ -24,22 +31,39 @@ const viaIcon: Record<string, typeof Plane> = {
   "Terrestre tren": Truck,
 };
 
-export default async function PortalHomePage() {
-  const { profile } = await getPerfilActual();
-  const [operaciones, cliente] = await Promise.all([
-    profile?.cliente_id ? getOperacionesPorCliente(profile.cliente_id) : Promise.resolve([]),
-    profile?.cliente_id ? getCliente(profile.cliente_id) : Promise.resolve(null),
-  ]);
+const TAMANOS_PAGINA = [10, 20, 30, 50, 100];
+const TAMANO_DEFAULT = 20;
 
-  const enCurso = operaciones.filter((o) => o.estado !== "completada").length;
-  const pendientes = operaciones.filter(
+export default async function PortalHomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const params = await searchParams;
+  const size = TAMANOS_PAGINA.includes(Number(params.size)) ? Number(params.size) : TAMANO_DEFAULT;
+  const pageSolicitada = Math.max(1, Math.floor(Number(params.page)) || 1);
+
+  const { profile } = await getPerfilActual();
+  const clienteId = profile?.cliente_id ?? null;
+
+  const [resumen, pagina, cliente] = await Promise.all([
+    clienteId ? getResumenOperaciones(clienteId) : Promise.resolve([]),
+    clienteId
+      ? getOperacionesPagina(pageSolicitada, size, ORDEN_OPERACIONES_DEFAULT, clienteId)
+      : Promise.resolve({ rows: [], total: 0, page: 1 }),
+    clienteId ? getCliente(clienteId) : Promise.resolve(null),
+  ]);
+  const operaciones = pagina.rows;
+
+  const enCurso = resumen.filter((o) => o.estado !== "completada").length;
+  const pendientes = resumen.filter(
     (o) => o.estado === "oficializada" || o.estado === "mafia_solicitado"
   ).length;
-  const fobTotal = operaciones.reduce((acc, o) => acc + Number(o.fob ?? 0), 0);
+  const fobTotal = resumen.reduce((acc, o) => acc + Number(o.fob ?? 0), 0);
 
   const kpis = [
     { label: "Operaciones en curso", value: enCurso, icon: ShipIcon },
-    { label: "Total de operaciones", value: operaciones.length, icon: Package },
+    { label: "Total de operaciones", value: resumen.length, icon: Package },
     { label: "Pendientes de despacho", value: pendientes, icon: Clock },
     {
       label: "FOB total",
@@ -58,16 +82,7 @@ export default async function PortalHomePage() {
       >
         <EstadoCuentaButton
           clienteNombre={cliente?.nombre ?? "Cliente"}
-          operaciones={operaciones.map((op) => ({
-            orden: op.orden,
-            exportador: op.exportador?.nombre ?? "—",
-            origen: op.pais_origen?.nombre ?? "—",
-            via: op.via?.nombre ?? "—",
-            fecha_arribo: op.fecha_arribo,
-            divisa: op.divisa?.nombre ?? "",
-            fob: op.fob,
-            estado: op.estado,
-          }))}
+          disabled={resumen.length === 0}
         />
       </AppTopbar>
       <div className="flex-1 space-y-6 p-6">
@@ -96,6 +111,12 @@ export default async function PortalHomePage() {
             className="animate-fade-in-up border-border/60 overflow-hidden py-0 xl:col-span-2"
             style={{ "--stagger": 4 } as React.CSSProperties}
           >
+            <PaginacionServidor
+              position="top"
+              page={pagina.page}
+              pageSize={size}
+              total={pagina.total}
+            />
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -109,7 +130,7 @@ export default async function PortalHomePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {operaciones.length === 0 ? (
+                  {pagina.total === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                         Todavía no tenés operaciones registradas.
@@ -155,6 +176,7 @@ export default async function PortalHomePage() {
                 </TableBody>
               </Table>
             </div>
+            <PaginacionServidor page={pagina.page} pageSize={size} total={pagina.total} />
           </Card>
 
           <Card
@@ -165,7 +187,7 @@ export default async function PortalHomePage() {
               <CardTitle className="text-base">Tus operaciones por estado</CardTitle>
             </CardHeader>
             <CardContent>
-              <EstadoDistributionChart estados={operaciones.map((o) => o.estado)} />
+              <EstadoDistributionChart estados={resumen.map((o) => o.estado)} />
             </CardContent>
           </Card>
         </div>

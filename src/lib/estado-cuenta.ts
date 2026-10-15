@@ -12,8 +12,12 @@ type OperacionResumen = {
   estado: EstadoOperacion;
 };
 
-export function exportarEstadoCuenta(clienteNombre: string, operaciones: OperacionResumen[]) {
-  const ventana = window.open("", "_blank");
+export function exportarEstadoCuenta(
+  clienteNombre: string,
+  operaciones: OperacionResumen[],
+  ventanaAbierta?: Window | null
+) {
+  const ventana = ventanaAbierta ?? window.open("", "_blank");
   if (!ventana) return;
 
   const fobTotal = operaciones.reduce((acc, o) => acc + Number(o.fob ?? 0), 0);

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AppTopbar } from "@/components/app-topbar";
 import { OperacionDialog } from "@/components/operacion-dialog";
 import { OperacionesTable } from "@/components/operaciones-table";
@@ -13,17 +14,25 @@ const TAMANO_DEFAULT = 20;
 export default async function OperacionesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; size?: string; sort?: string; dir?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    size?: string;
+    sort?: string;
+    dir?: string;
+    cliente?: string;
+  }>;
 }) {
   const params = await searchParams;
   const size = TAMANOS_PAGINA.includes(Number(params.size)) ? Number(params.size) : TAMANO_DEFAULT;
   const pageSolicitada = Math.max(1, Math.floor(Number(params.page)) || 1);
   const orden = normalizarOrden(params.sort, params.dir);
+  const clienteId =
+    params.cliente && /^[0-9a-f-]{36}$/i.test(params.cliente) ? params.cliente : undefined;
 
   const supabase = await createClient();
   const [pagina, clientesRes, exportadoresRes, paisesRes, viasRes, incotermsRes, divisasRes] =
     await Promise.all([
-      getOperacionesPagina(pageSolicitada, size, orden),
+      getOperacionesPagina(pageSolicitada, size, orden, clienteId),
       supabase.from("clientes").select("id, nombre").order("nombre"),
       supabase.from("exportadores").select("id, nombre").order("nombre"),
       supabase.from("paises").select("id, nombre").order("nombre"),
@@ -31,6 +40,9 @@ export default async function OperacionesPage({
       supabase.from("incoterms").select("id, nombre").order("nombre"),
       supabase.from("divisas").select("id, nombre").order("nombre"),
     ]);
+  const clienteFiltrado = clienteId
+    ? (clientesRes.data ?? []).find((c) => c.id === clienteId)
+    : undefined;
   const mensajesMap = await getResumenMensajesPorOperacion(pagina.rows.map((o) => o.id));
   const mensajesPorOperacion = Object.fromEntries(mensajesMap);
 
@@ -41,6 +53,17 @@ export default async function OperacionesPage({
         description={`${pagina.total} operaciones registradas`}
       />
       <div className="flex-1 space-y-4 p-6">
+        {clienteFiltrado ? (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Filtrado por cliente:</span>
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">
+              {clienteFiltrado.nombre}
+            </span>
+            <Link href="/operaciones" className="text-muted-foreground hover:text-foreground hover:underline">
+              Quitar filtro
+            </Link>
+          </div>
+        ) : null}
         <OperacionesTable
           operaciones={pagina.rows}
           total={pagina.total}
@@ -48,6 +71,7 @@ export default async function OperacionesPage({
           pageSize={size}
           sortKey={orden.sort}
           sortDir={orden.dir}
+          clienteId={clienteId}
           mensajesPorOperacion={mensajesPorOperacion}
           accionesExtra={
             <>

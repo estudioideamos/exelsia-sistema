@@ -103,6 +103,38 @@ function Campo({
   );
 }
 
+function SelectField({
+  name,
+  label,
+  options,
+  defaultValue,
+}: {
+  name: string;
+  label: string;
+  options: Opcion[];
+  defaultValue?: string | null;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={name}>{label}</Label>
+      <Select name={name} defaultValue={defaultValue ?? undefined}>
+        <SelectTrigger className="w-full" id={name}>
+          <SelectValue placeholder="Seleccionar">
+            {(value: string) => options.find((o) => o.id === value)?.nombre ?? "Seleccionar"}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt.id} value={opt.id}>
+              {opt.nombre}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 export function OperacionDialog({
   trigger,
   clientes,
@@ -150,38 +182,6 @@ export function OperacionDialog({
         });
       }
     });
-  }
-
-  function SelectField({
-    name,
-    label,
-    options,
-    defaultValue,
-  }: {
-    name: string;
-    label: string;
-    options: Opcion[];
-    defaultValue?: string | null;
-  }) {
-    return (
-      <div className="space-y-2">
-        <Label htmlFor={name}>{label}</Label>
-        <Select name={name} defaultValue={defaultValue ?? undefined}>
-          <SelectTrigger className="w-full" id={name}>
-            <SelectValue placeholder="Seleccionar">
-              {(value: string) => options.find((o) => o.id === value)?.nombre ?? "Seleccionar"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((opt) => (
-              <SelectItem key={opt.id} value={opt.id}>
-                {opt.nombre}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    );
   }
 
   return (

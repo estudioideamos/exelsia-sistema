@@ -159,8 +159,8 @@ export default function ManualPage() {
               <Punto titulo="Buscar, paginar y navegar">
                 Usá el buscador de arriba (o el atajo <Kbd>⌘K</Kbd> / <Kbd>Ctrl K</Kbd>) para
                 encontrar una operación por orden, cliente o AWB/BL sin salir de la pantalla en la
-                que estás. Los controles de "Resultados por página" están arriba y abajo de la
-                tabla; por defecto muestra 50 y podés subirlo a 100, 500 o "Todo".
+                que estás. Los controles de &ldquo;Resultados por página&rdquo; están arriba y abajo de la
+                tabla; por defecto muestra 20 y podés subirlo hasta 100.
               </Punto>
 
               <Punto titulo="Nueva operación / Editar">
@@ -211,16 +211,16 @@ export default function ManualPage() {
               </ul>
 
               <Punto titulo="Importar desde Excel">
-                El botón "Importar" acepta un archivo .xlsx/.csv con columnas Orden, Cliente,
+                El botón &ldquo;Importar&rdquo; acepta un archivo .xlsx/.csv con columnas Orden, Cliente,
                 Exportador, Origen, Vía, AWB/BL, Arribo, FOB y Estado. Si la orden ya existe la
                 actualiza; si no, la crea (resolviendo cliente y exportador por nombre). Al final
                 te muestra un resumen de filas creadas, actualizadas y con error.
               </Punto>
 
               <Punto titulo="Exportar, imprimir y borrar">
-                Con el check de la izquierda seleccionás una o varias filas. "Exportar" te deja
-                elegir Excel o CSV (o imprimir un reporte con membrete de Exelsia); "Borrar
-                seleccionados" las elimina para siempre, previa confirmación.
+                Con el check de la izquierda seleccionás una o varias filas. &ldquo;Exportar&rdquo; te deja
+                elegir Excel o CSV (o imprimir un reporte con membrete de Exelsia); &ldquo;Borrar
+                seleccionados&rdquo; las elimina para siempre, previa confirmación.
               </Punto>
             </Seccion>
 
@@ -341,7 +341,7 @@ export default function ManualPage() {
                 en pantallas chicas.
               </Punto>
               <Punto titulo="Recuperar contraseña">
-                Desde el login, "¿Olvidaste tu contraseña?" te envía un link para elegir una
+                Desde el login, &ldquo;¿Olvidaste tu contraseña?&rdquo; te envía un link para elegir una
                 nueva.
               </Punto>
               <div className="flex items-start gap-2 rounded-lg border border-border/60 bg-muted/30 p-3">

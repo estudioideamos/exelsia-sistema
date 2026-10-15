@@ -17,6 +17,22 @@ import { formatFecha } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 import { Pencil } from "lucide-react";
 
+function GrupoCampos({ titulo, campos }: { titulo: string; campos: { label: string; value: string }[] }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{titulo}</p>
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+        {campos.map(({ label, value }) => (
+          <div key={label}>
+            <dt className="text-xs text-muted-foreground">{label}</dt>
+            <dd className="text-sm font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
 export default async function OperacionDetailPage({
   params,
 }: {
@@ -96,22 +112,6 @@ export default async function OperacionDetailPage({
     { label: "MAFIA depositado", value: numeroFmt(operacion.mafia_depositado) },
     { label: "Fecha de depósito MAFIA", value: formatFecha(operacion.fecha_deposito_mafia) },
   ];
-
-  function GrupoCampos({ titulo, campos }: { titulo: string; campos: { label: string; value: string }[] }) {
-    return (
-      <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{titulo}</p>
-        <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-          {campos.map(({ label, value }) => (
-            <div key={label}>
-              <dt className="text-xs text-muted-foreground">{label}</dt>
-              <dd className="text-sm font-medium">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-    );
-  }
 
   return (
     <>

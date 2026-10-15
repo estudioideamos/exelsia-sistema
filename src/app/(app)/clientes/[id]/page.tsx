@@ -22,9 +22,13 @@ import {
   getArchivosCliente,
   getCliente,
   getDestinatariosCliente,
-  getOperacionesPorCliente,
+  getOperacionesPagina,
+  ORDEN_OPERACIONES_DEFAULT,
 } from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
+
+// Las más recientes; el listado completo (con paginación) está en Operaciones.
+const OPERACIONES_VISIBLES = 20;
 
 function initials(name: string) {
   return name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -39,8 +43,8 @@ export default async function ClienteDetailPage({
   const cliente = await getCliente(id);
   if (!cliente) notFound();
 
-  const [operacionesCliente, archivosCliente, destinatarios, alertas] = await Promise.all([
-    getOperacionesPorCliente(id),
+  const [operacionesPagina, archivosCliente, destinatarios, alertas] = await Promise.all([
+    getOperacionesPagina(1, OPERACIONES_VISIBLES, ORDEN_OPERACIONES_DEFAULT, id),
     getArchivosCliente(id),
     getDestinatariosCliente(id),
     getAlertasCliente(id),
@@ -66,7 +70,7 @@ export default async function ClienteDetailPage({
               </div>
             </div>
             <Badge variant="secondary" className="w-fit">
-              {operacionesCliente.length} operaciones
+              {operacionesPagina.total} operaciones
             </Badge>
           </CardContent>
         </Card>
@@ -75,7 +79,7 @@ export default async function ClienteDetailPage({
           <TabsList>
             <TabsTrigger value="perfil">Perfil</TabsTrigger>
             <TabsTrigger value="operaciones">
-              Operaciones ({operacionesCliente.length})
+              Operaciones ({operacionesPagina.total})
             </TabsTrigger>
             <TabsTrigger value="archivos">Archivos ({archivosCliente.length})</TabsTrigger>
             <TabsTrigger value="avisos">Avisos ({destinatarios.length})</TabsTrigger>
@@ -107,14 +111,14 @@ export default async function ClienteDetailPage({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {operacionesCliente.length === 0 ? (
+                    {operacionesPagina.total === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                           Este cliente no tiene operaciones registradas todavía.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      operacionesCliente.map((op) => (
+                      operacionesPagina.rows.map((op) => (
                         <TableRow key={op.id}>
                           <TableCell>
                             <Link href={`/operaciones/${op.id}`} className="font-medium hover:text-primary">
@@ -138,6 +142,18 @@ export default async function ClienteDetailPage({
                   </TableBody>
                 </Table>
               </div>
+              {operacionesPagina.total > operacionesPagina.rows.length ? (
+                <div className="border-t border-border/60 px-4 py-3 text-sm text-muted-foreground">
+                  Mostrando las {operacionesPagina.rows.length} más recientes de{" "}
+                  {operacionesPagina.total}.{" "}
+                  <Link
+                    href={`/operaciones?cliente=${cliente.id}`}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Ver todas las operaciones de este cliente
+                  </Link>
+                </div>
+              ) : null}
             </Card>
           </TabsContent>
 

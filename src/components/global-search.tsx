@@ -62,15 +62,12 @@ export function GlobalSearch({
   }, []);
 
   useEffect(() => {
-    const q = query.trim();
-    if (q.length < 2) {
-      setOperaciones([]);
-      setClientes([]);
-      return;
-    }
+    // Se quitan los caracteres que tienen significado dentro del filtro de la API.
+    const q = query.replace(/[,()*"\%]/g, " ").trim();
+    if (q.length < 2) return;
 
-    setLoading(true);
     const timeout = setTimeout(async () => {
+      setLoading(true);
       const supabase = createClient();
       const [opsRes, clientesRes] = await Promise.all([
         supabase
@@ -88,7 +85,7 @@ export function GlobalSearch({
     }, 250);
 
     return () => clearTimeout(timeout);
-  }, [query]);
+  }, [query, includeClientes]);
 
   function goTo(path: string) {
     router.push(path);
