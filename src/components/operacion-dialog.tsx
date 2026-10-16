@@ -166,8 +166,13 @@ export function OperacionDialog({
     startTransition(async () => {
       try {
         if (esEdicion && operacionId) {
-          await actualizarOperacion(operacionId, formData);
-          toast.success("Operación actualizada");
+          const resultado = await actualizarOperacion(operacionId, formData);
+          toast.success("Operación actualizada", {
+            description:
+              resultado.avisados > 0
+                ? "Se le avisó al cliente del cambio de datos."
+                : undefined,
+          });
           setOpen(false);
           router.refresh();
         } else {

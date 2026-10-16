@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ESTADOS, type EstadoOperacion } from "@/lib/mock-data";
 import { bloqueArchivosHtml, interpolarPlantilla, type ArchivoAviso } from "@/lib/email-variables";
 import { formatFecha } from "@/lib/utils";
+import { urlOperacionPortal } from "@/lib/site";
+import type { CambioOperacion } from "@/lib/cambios-operacion";
 
 export type DatosAvisoOperacion = {
   email: string | string[];
@@ -144,5 +146,53 @@ export async function enviarAvisoCambioEstado(datos: DatosAvisoOperacion) {
     return false;
   }
 
+  return true;
+}
+
+function esc(texto: string) {
+  return texto
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+const TD = "padding:8px 10px;border:1px solid #e5e5e5;";
+
+export async function enviarAvisoCambioDatos(datos: {
+  email: string[];
+  operacionId: string;
+  cliente: string;
+  orden: string;
+  cambios: CambioOperacion[];
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("RESEND_API_KEY no configurada — se omite el envío de email.");
+    return false;
+  }
+
+  const filas = datos.cambios
+    .map(
+      (c) =>
+        `<tr><td style="${TD}font-weight:bold;">${esc(c.campo)}</td><td style="${TD}color:#777777;">${esc(c.antes)}</td><td style="${TD}font-weight:bold;">${esc(c.despues)}</td></tr>`
+    )
+    .join("");
+
+  const th = `${TD}text-align:left;background:#f5f5f5;`;
+  const html = `<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto;"><h2 style="color: #E02B20;">Exelsia</h2><p>Hola ${esc(datos.cliente)},</p><p>Actualizamos datos de tu operación <strong>${esc(datos.orden)}</strong>:</p><table style="border-collapse:collapse;width:100%;font-size:14px;"><thead><tr><th style="${th}">Dato</th><th style="${th}">Antes</th><th style="${th}">Ahora</th></tr></thead><tbody>${filas}</tbody></table><p style="margin:18px 0 0;"><a href="${esc(urlOperacionPortal(datos.operacionId))}" style="display:inline-block;background:#E02B20;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:6px;font-size:14px;font-weight:bold;">Ver la operación en el portal</a></p></div>`;
+
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL || "Exelsia <onboarding@resend.dev>",
+    to: datos.email,
+    subject: `Se actualizó tu operación ${datos.orden}`,
+    html,
+  });
+
+  if (error) {
+    console.error("Error enviando aviso de cambio de datos:", error);
+    return false;
+  }
   return true;
 }

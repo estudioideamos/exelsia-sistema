@@ -5,6 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { ESTADOS, type EstadoOperacion } from "@/lib/mock-data";
 import { getTodasOperaciones, normalizarOrden } from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
+import { detectarCambios } from "@/lib/cambios-operacion";
+import { resolverDestinatariosAviso } from "@/lib/destinatarios";
+import { enviarAvisoCambioDatos } from "@/lib/email";
 
 function optionalId(formData: FormData, key: string) {
   const value = String(formData.get(key) ?? "");
@@ -91,16 +94,49 @@ export async function crearOperacion(formData: FormData) {
 export async function actualizarOperacion(id: string, formData: FormData) {
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const nuevos = datosDeFormulario(formData);
+
+  const { data: anterior } = await supabase
     .from("operaciones")
-    .update(datosDeFormulario(formData))
-    .eq("id", id);
+    .select("*, clientes(nombre, email_contacto)")
+    .eq("id", id)
+    .maybeSingle();
+
+  const { error } = await supabase.from("operaciones").update(nuevos).eq("id", id);
 
   if (error) throw error;
+
+  // Si cambió algún dato visible para el cliente, se le avisa en un único mail.
+  const cambios = detectarCambios(anterior, nuevos);
+  let avisados = 0;
+  if (anterior && cambios.length > 0) {
+    const cliente = anterior.clientes as unknown as {
+      nombre: string;
+      email_contacto: string | null;
+    } | null;
+    const { emails } = await resolverDestinatariosAviso(
+      supabase,
+      anterior.cliente_id as string,
+      anterior.estado as string,
+      cliente?.email_contacto ?? null
+    );
+    if (cliente && emails.length > 0) {
+      const enviado = await enviarAvisoCambioDatos({
+        email: emails,
+        operacionId: id,
+        cliente: cliente.nombre,
+        orden: nuevos.orden,
+        cambios,
+      });
+      if (enviado) avisados = emails.length;
+    }
+  }
 
   revalidatePath(`/operaciones/${id}`);
   revalidatePath("/operaciones");
   revalidatePath("/dashboard");
+
+  return { cambios: cambios.length, avisados };
 }
 
 export type FilaImportOperacion = {

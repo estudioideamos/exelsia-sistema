@@ -277,11 +277,21 @@ export default function ManualPage() {
               <Punto titulo="Documentos que acompañan cada aviso">
                 Debajo de las plantillas hay una grilla con cada tipo de archivo y cada etapa.
                 Lo que tildes ahí viaja en el mail: al cambiar una operación de etapa, el aviso
-                incluye links de descarga de los archivos de esa operación cuyo tipo esté
-                tildado para esa etapa. Los links vencen a los 7 días. Con la variable{" "}
+                lista los archivos de esa operación cuyo tipo esté tildado para esa etapa, con
+                un botón que lleva al portal, donde el cliente los descarga con su usuario y no
+                vencen. Con la variable{" "}
                 <span className="font-mono text-xs">{"{{archivos}}"}</span> elegís dónde
                 aparecen dentro del mail; si no la usás, quedan al final. Sin nada tildado, el
                 aviso sale sin documentos.
+              </Punto>
+              <Punto titulo="Aviso por cambio de datos">
+                Además del aviso por cambio de etapa, al editar una operación y guardar, si
+                cambió alguno de estos datos el cliente recibe un único mail con lo que había
+                antes y lo que hay ahora: fecha de la orden, orden de compra, AWB / BL, forwarder,
+                fecha de arribo, envío de orden / terminal, oficialización, fecha de entrega,
+                despacho, factura, fecha de factura, peso y NCM. Se envía a las mismas casillas
+                que reciben la etapa actual de la operación. Los importes internos y las notas
+                internas no se avisan. La carga masiva desde Excel no envía avisos.
               </Punto>
               <Punto titulo="Editor Visual o HTML">
                 Podés escribir con el editor visual (como un Word simple: negrita, cursiva,
