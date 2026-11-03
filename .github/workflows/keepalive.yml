@@ -2,7 +2,7 @@ name: Mantener activo Supabase
 
 on:
   schedule:
-    - cron: "17 12 * * *"
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 jobs:
@@ -14,6 +14,16 @@ jobs:
           SUPABASE_URL: https://eanrcsqfzfyuhcpaaxre.supabase.co
           SUPABASE_PUBLISHABLE_KEY: sb_publishable_srj3tS9SH7xR9nz0UsQzhA_jv-uKRPm
         run: |
+          # Varias consultas a la base, a la API de autenticación y al storage,
+          # para que el proyecto registre actividad real en cada servicio.
+          for tabla in paises operaciones clientes; do
+            curl --fail --silent --show-error --max-time 30 --retry 3 --retry-delay 10 \
+              "$SUPABASE_URL/rest/v1/$tabla?select=id&limit=1" \
+              -H "apikey: $SUPABASE_PUBLISHABLE_KEY" -o /dev/null
+          done
           curl --fail --silent --show-error --max-time 30 --retry 3 --retry-delay 10 \
-            "$SUPABASE_URL/rest/v1/paises?select=id&limit=1" \
-            -H "apikey: $SUPABASE_PUBLISHABLE_KEY"
+            "$SUPABASE_URL/auth/v1/settings" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" -o /dev/null
+          curl --fail --silent --show-error --max-time 30 --retry 3 --retry-delay 10 \
+            "$SUPABASE_URL/storage/v1/bucket/archivos-clientes" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" -o /dev/null || true
