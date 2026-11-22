@@ -169,7 +169,7 @@ export default function ManualPage() {
                   <Badge variant="secondary">General</Badge>
                   <Badge variant="secondary">Comercial</Badge>
                   <Badge variant="secondary">Aduana</Badge>
-                  <Badge variant="secondary">Anticipos / MAFIA</Badge>
+                  <Badge variant="secondary">Anticipos / SIM</Badge>
                 </span>
               </Punto>
 
@@ -284,14 +284,29 @@ export default function ManualPage() {
                 aparecen dentro del mail; si no la usás, quedan al final. Sin nada tildado, el
                 aviso sale sin documentos.
               </Punto>
-              <Punto titulo="Aviso por cambio de datos">
-                Además del aviso por cambio de etapa, al editar una operación y guardar, si
-                cambió alguno de estos datos el cliente recibe un único mail con lo que había
-                antes y lo que hay ahora: fecha de la orden, orden de compra, AWB / BL, forwarder,
-                fecha de arribo, envío de orden / terminal, oficialización, fecha de entrega,
-                despacho, factura, fecha de factura, peso y NCM. Se envía a las mismas casillas
-                que reciben la etapa actual de la operación. Los importes internos y las notas
-                internas no se avisan. La carga masiva desde Excel no envía avisos.
+              <Punto titulo="Avisos por evento de la carpeta">
+                Además de los avisos por estado, el sistema envía un mail cuando se carga o cambia
+                un dato puntual de la carpeta. Hay seis eventos: apertura de carpeta (una sola
+                vez, al crearla), cambio de fecha de arribo o de salida (cada vez que cambia),
+                anticipos (al tener cargados el anticipo de gastos y el importe SIM, y ante
+                cambios en ellos), oficialización (al cargar el N° de oficialización o de permiso
+                de embarque), fecha de entrega (solo importación) y cierre y factura (al cargar
+                o cambiar las facturas de Exelsia). Los datos que faltan figuran como
+                &ldquo;Pendiente&rdquo;. La carga masiva desde Excel no envía avisos.
+              </Punto>
+              <Punto titulo="Quién recibe cada evento y qué adjunta">
+                En el perfil de cada cliente, cada casilla tiene dos tildes por evento: &ldquo;Aviso&rdquo;
+                (recibe el mail) y &ldquo;Adjunto&rdquo; (el mail suma los documentos de la carpeta,
+                con un botón que lleva al portal). Los documentos se toman según la categoría del
+                archivo: Carátula (apertura), Presupuesto (anticipos), despacho o permiso de
+                embarque (oficialización) y Factura Exelsia y Legajo (cierre y factura).
+              </Punto>
+              <Punto titulo="Importación y exportación">
+                Al crear una operación se elige si es de importación o de exportación, y el
+                formulario muestra los datos de cada tipo. La fecha de entrega y el aviso de
+                entrega existen solo en importación. Desde la ficha de la operación, el botón
+                &ldquo;Tapa de carpeta&rdquo; imprime la tapa con las intervenciones una debajo de la
+                otra (se cargan separadas por &ldquo;/&rdquo;).
               </Punto>
               <Punto titulo="Editor Visual o HTML">
                 Podés escribir con el editor visual (como un Word simple: negrita, cursiva,

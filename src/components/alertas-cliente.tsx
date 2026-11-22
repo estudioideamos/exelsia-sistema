@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ESTADOS } from "@/lib/mock-data";
+import { EVENTOS, claveAdjuntoEvento, claveAvisoEvento } from "@/lib/eventos";
 import type { AlertaCliente, DestinatarioCliente } from "@/lib/data";
 import {
   agregarDestinatario,
@@ -180,6 +181,73 @@ export function AlertasCliente({
         >
           Usar el mail de contacto como primera casilla
         </Button>
+      ) : null}
+
+      {destinatarios.length > 0 ? (
+        <div className="space-y-2">
+          <div>
+            <h3 className="text-sm font-semibold">Avisos por evento de la carpeta</h3>
+            <p className="text-xs text-muted-foreground">
+              Cada casilla recibe el aviso de los eventos tildados. &ldquo;Adjunto&rdquo; suma los
+              documentos de la carpeta al mismo mail.
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-lg border border-border/60">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead className="min-w-44">Evento</TableHead>
+                  {destinatarios.map((d) => (
+                    <TableHead key={d.id} className="min-w-48">
+                      <p className="truncate text-sm font-medium text-foreground">{d.email}</p>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {EVENTOS.map((evento) => (
+                  <TableRow key={evento.key}>
+                    <TableCell>
+                      <p className="text-sm font-medium">{evento.label}</p>
+                      <p className="max-w-56 text-xs text-muted-foreground">{evento.descripcion}</p>
+                    </TableCell>
+                    {destinatarios.map((d) => (
+                      <TableCell key={d.id}>
+                        <div className="flex flex-col gap-2">
+                          <label className="flex items-center gap-2 text-xs">
+                            <Checkbox
+                              checked={activas.has(clave(claveAvisoEvento(evento.key), d.id))}
+                              onCheckedChange={(checked) =>
+                                alternar(claveAvisoEvento(evento.key), d.id, checked === true)
+                              }
+                              aria-label={`Aviso de ${evento.label} para ${d.email}`}
+                            />
+                            Aviso
+                          </label>
+                          {evento.tipos.length > 0 ? (
+                            <label className="flex items-center gap-2 text-xs">
+                              <Checkbox
+                                checked={activas.has(clave(claveAdjuntoEvento(evento.key), d.id))}
+                                onCheckedChange={(checked) =>
+                                  alternar(claveAdjuntoEvento(evento.key), d.id, checked === true)
+                                }
+                                aria-label={`Adjunto de ${evento.label} para ${d.email}`}
+                              />
+                              Adjunto
+                            </label>
+                          ) : null}
+                        </div>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="pt-4">
+            <h3 className="text-sm font-semibold">Avisos por cambio de estado</h3>
+          </div>
+        </div>
       ) : null}
 
       {destinatarios.length > 0 ? (

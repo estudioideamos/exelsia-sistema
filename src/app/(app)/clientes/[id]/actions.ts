@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ESTADOS } from "@/lib/mock-data";
+import { EVENTOS, claveAdjuntoEvento, claveAvisoEvento, esClaveEvento } from "@/lib/eventos";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -50,10 +51,18 @@ export async function agregarDestinatario(clienteId: string, email: string, etiq
     throw error;
   }
 
-  // La primera casilla arranca recibiendo todas las etapas, para no cortar los avisos que ya salían.
+  // La primera casilla arranca recibiendo todas las etapas y todos los eventos (con
+  // documentos), para no cortar los avisos que ya salían.
   if (esPrimero) {
+    const claves = [
+      ...Object.keys(ESTADOS),
+      ...EVENTOS.flatMap((e) => [
+        claveAvisoEvento(e.key),
+        ...(e.tipos.length > 0 ? [claveAdjuntoEvento(e.key)] : []),
+      ]),
+    ];
     const { error: alertasError } = await supabase.from("cliente_alertas").insert(
-      Object.keys(ESTADOS).map((estado) => ({
+      claves.map((estado) => ({
         cliente_id: clienteId,
         estado,
         destinatario_id: data.id,
@@ -83,7 +92,7 @@ export async function setAlertaCliente(
   destinatarioId: string,
   activo: boolean
 ) {
-  if (!(estado in ESTADOS)) throw new Error("Etapa inválida.");
+  if (!(estado in ESTADOS) && !esClaveEvento(estado)) throw new Error("Aviso inválido.");
 
   const supabase = await createClient();
 

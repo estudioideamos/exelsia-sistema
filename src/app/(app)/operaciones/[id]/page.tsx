@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { EstadoSelector } from "@/components/estado-selector";
 import { ArchivosCliente } from "@/components/archivos-cliente";
 import { OperacionDialog } from "@/components/operacion-dialog";
+import { ImprimirTapaButton } from "@/components/imprimir-tapa-button";
 import { OperacionTimeline } from "@/components/operacion-timeline";
 import { NotasInternas } from "@/components/notas-internas";
 import { OperacionMensajes } from "@/components/operacion-mensajes";
@@ -61,56 +62,85 @@ export default async function OperacionDetailPage({
   const numeroFmt = (n: number | null | undefined) =>
     n == null ? "—" : n.toLocaleString("es-AR", { minimumFractionDigits: 2 });
 
+  const impo = (operacion.tipo ?? "importacion") === "importacion";
+  const ars = (n: number | null | undefined) => (n == null ? "—" : `ARS ${numeroFmt(n)}`);
+
   const camposGeneral = [
     { label: "Cliente", value: operacion.cliente?.nombre ?? "—" },
     { label: "Fecha", value: formatFecha(operacion.fecha_orden) },
-    { label: "Exportador", value: operacion.exportador?.nombre ?? "—" },
+    { label: impo ? "Exportador / Proveedor" : "Importador / Proveedor", value: operacion.exportador?.nombre ?? "—" },
     { label: "Origen", value: operacion.pais_origen?.nombre ?? "—" },
+    impo
+      ? { label: "Procedencia", value: operacion.procedencia ?? "—" }
+      : { label: "Destino", value: operacion.destino ?? "—" },
+    { label: "Orden de compra", value: operacion.orden_compra ?? "—" },
     { label: "Vía", value: operacion.via?.nombre ?? "—" },
-    { label: "AWB / BL", value: operacion.awb_bl ?? "—" },
-    { label: "Fecha de arribo", value: formatFecha(operacion.fecha_arribo) },
+    { label: "Doc. de transporte (AWB / BL)", value: operacion.awb_bl ?? "—" },
+    { label: "Nombre del transporte", value: operacion.nombre_transporte ?? "—" },
+    ...(impo
+      ? [{ label: "ETA (fecha de arribo)", value: formatFecha(operacion.fecha_arribo) }]
+      : [
+          { label: "Cutoff documental", value: formatFecha(operacion.cutoff_documental) },
+          { label: "Cutoff físico", value: formatFecha(operacion.cutoff_fisico) },
+          { label: "ETD (fecha de salida)", value: formatFecha(operacion.fecha_salida) },
+        ]),
     { label: "Forwarder", value: operacion.forwarder ?? "—" },
-    { label: "Peso (Kg)", value: numeroFmt(operacion.peso_kg) },
+    ...(impo ? [] : [{ label: "CUIT del ATA", value: operacion.cuit_ata ?? "—" }]),
+    { label: "Peso bruto (Kg)", value: numeroFmt(operacion.peso_kg) },
   ];
 
   const camposComercial = [
     { label: "Incoterm", value: operacion.incoterm?.nombre ?? "—" },
     { label: "Divisa", value: operacion.divisa?.nombre ?? "—" },
-    { label: "FOB", value: numeroFmt(operacion.fob) },
     { label: "TC", value: numeroFmt(operacion.tc) },
     { label: "Gastos hasta FOB", value: numeroFmt(operacion.gastos_fob) },
-    { label: "Flete", value: numeroFmt(operacion.flete) },
-    { label: "Seguro", value: numeroFmt(operacion.seguro) },
-    { label: "Ajuste", value: numeroFmt(operacion.ajuste) },
+    { label: "FOB", value: numeroFmt(operacion.fob) },
+    ...(impo
+      ? [
+          { label: "Flete", value: numeroFmt(operacion.flete) },
+          { label: "Seguro", value: numeroFmt(operacion.seguro) },
+          { label: "Ajuste", value: numeroFmt(operacion.ajuste) },
+        ]
+      : []),
     { label: "Base imponible", value: numeroFmt(operacion.base_imponible) },
-    { label: "Factura", value: operacion.factura ?? "—" },
+    { label: impo ? "Factura de importación" : "Factura de exportación", value: operacion.factura ?? "—" },
     { label: "Fecha de factura", value: formatFecha(operacion.fecha_factura) },
-    { label: "Orden de compra", value: operacion.orden_compra ?? "—" },
     { label: "Facturas Exelsia", value: operacion.facturas_exelsia ?? "—" },
     { label: "Fecha de factura Exelsia", value: formatFecha(operacion.fecha_factura_exelsia) },
   ];
 
   const camposAduana = [
-    { label: "Envío de orden / Terminal", value: operacion.envio_terminal ?? "—" },
+    { label: "Fiscal / Terminal", value: operacion.envio_terminal ?? "—" },
     { label: "NCM", value: operacion.ncm ?? "—" },
     { label: "Oficialización DJAI", value: operacion.oficializacion_dua ?? "—" },
-    { label: "N° de oficialización", value: operacion.numero_oficializacion ?? "—" },
+    {
+      label: impo ? "N° de oficialización" : "N° de permiso de embarque",
+      value: operacion.numero_oficializacion ?? "—",
+    },
     { label: "Fecha de oficialización", value: formatFecha(operacion.fecha_oficializacion) },
-    { label: "Fecha de entrega", value: formatFecha(operacion.fecha_entrega) },
+    ...(impo
+      ? [
+          { label: "Vencimiento de forzoso", value: formatFecha(operacion.vto_forzoso) },
+          { label: "Fecha de entrega", value: formatFecha(operacion.fecha_entrega) },
+        ]
+      : [
+          { label: "Fecha de precumplido", value: formatFecha(operacion.fecha_precumplido) },
+          { label: "Fecha de cumplido", value: formatFecha(operacion.fecha_cumplido) },
+        ]),
     { label: "Despacho", value: operacion.despacho ?? "—" },
-    { label: "Intervinientes", value: operacion.intervinientes ?? "—" },
+    { label: "Intervenciones", value: operacion.intervinientes ?? "—" },
   ];
 
   const camposAnticipos = [
-    { label: "Anticipo solicitado", value: numeroFmt(operacion.anticipo_solicitado) },
+    { label: "Anticipo de gastos solicitado", value: ars(operacion.anticipo_solicitado) },
     { label: "Fecha de anticipo", value: formatFecha(operacion.fecha_anticipo) },
-    { label: "Anticipo depositado", value: numeroFmt(operacion.anticipo_depositado) },
-    { label: "Pendiente", value: numeroFmt(operacion.pendiente) },
-    { label: "Fecha de depósito", value: formatFecha(operacion.fecha_deposito_anticipo) },
-    { label: "MAFIA solicitado", value: numeroFmt(operacion.mafia_solicitado) },
-    { label: "Fecha dep. MAFIA", value: formatFecha(operacion.fecha_mafia_deposito) },
-    { label: "MAFIA depositado", value: numeroFmt(operacion.mafia_depositado) },
-    { label: "Fecha de depósito MAFIA", value: formatFecha(operacion.fecha_deposito_mafia) },
+    { label: "Anticipo depositado", value: ars(operacion.anticipo_depositado) },
+    { label: "Pendiente / Refuerzo", value: ars(operacion.pendiente) },
+    { label: "Fecha de acreditación de gastos", value: formatFecha(operacion.fecha_deposito_anticipo) },
+    { label: "Importe SIM solicitado", value: ars(operacion.mafia_solicitado) },
+    { label: "Fecha depósito SIM", value: formatFecha(operacion.fecha_mafia_deposito) },
+    { label: "SIM depositado", value: ars(operacion.mafia_depositado) },
+    { label: "Fecha de acreditación de fondos de aduana (SIM)", value: formatFecha(operacion.fecha_deposito_mafia) },
   ];
 
   return (
@@ -122,6 +152,7 @@ export default async function OperacionDetailPage({
       <div className="flex-1 space-y-6 p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
+            <Badge variant="secondary">{impo ? "Importación" : "Exportación"}</Badge>
             <Badge variant="outline" className={ESTADOS[operacion.estado].className}>
               {ESTADOS[operacion.estado].label}
             </Badge>
@@ -130,6 +161,20 @@ export default async function OperacionDetailPage({
             </Link>
           </div>
           <div className="flex items-center gap-2">
+            <ImprimirTapaButton
+              datos={{
+                tipo: operacion.tipo ?? "importacion",
+                orden: operacion.orden,
+                cliente: operacion.cliente?.nombre ?? "",
+                contraparte: operacion.exportador?.nombre ?? "",
+                ordenCompra: operacion.orden_compra ?? "",
+                docTransporte: operacion.awb_bl ?? "",
+                fechaTransporte: impo ? operacion.fecha_arribo : (operacion.fecha_salida ?? null),
+                forwarder: operacion.forwarder ?? "",
+                descripcion: operacion.descripcion ?? "",
+                intervenciones: operacion.intervinientes ?? "",
+              }}
+            />
             <OperacionDialog
               operacionId={operacion.id}
               trigger={
@@ -145,6 +190,17 @@ export default async function OperacionDetailPage({
               incoterms={incotermsRes.data ?? []}
               divisas={divisasRes.data ?? []}
               valoresIniciales={{
+                tipo: operacion.tipo ?? "importacion",
+                procedencia: operacion.procedencia,
+                destino: operacion.destino,
+                nombre_transporte: operacion.nombre_transporte,
+                vto_forzoso: operacion.vto_forzoso,
+                fecha_salida: operacion.fecha_salida,
+                cutoff_documental: operacion.cutoff_documental,
+                cutoff_fisico: operacion.cutoff_fisico,
+                cuit_ata: operacion.cuit_ata,
+                fecha_precumplido: operacion.fecha_precumplido,
+                fecha_cumplido: operacion.fecha_cumplido,
                 orden: operacion.orden,
                 cliente_id: operacion.cliente_id,
                 exportador_id: operacion.exportador_id,
@@ -210,7 +266,7 @@ export default async function OperacionDetailPage({
               <Separator />
               <GrupoCampos titulo="Aduana" campos={camposAduana} />
               <Separator />
-              <GrupoCampos titulo="Anticipos / MAFIA" campos={camposAnticipos} />
+              <GrupoCampos titulo="Anticipos / SIM" campos={camposAnticipos} />
             </CardContent>
           </Card>
 

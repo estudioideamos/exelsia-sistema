@@ -37,10 +37,10 @@ export const EMAIL_VARIABLES = [
   { token: "{{anticipo_depositado}}", label: "Anticipo depositado" },
   { token: "{{pendiente}}", label: "Pendiente" },
   { token: "{{fecha_deposito_anticipo}}", label: "Fecha de depósito" },
-  { token: "{{mafia_solicitado}}", label: "MAFIA solicitado" },
-  { token: "{{fecha_mafia_deposito}}", label: "Fecha dep. MAFIA" },
-  { token: "{{mafia_depositado}}", label: "MAFIA depositado" },
-  { token: "{{fecha_deposito_mafia}}", label: "Fecha de depósito MAFIA" },
+  { token: "{{mafia_solicitado}}", label: "SIM solicitado" },
+  { token: "{{fecha_mafia_deposito}}", label: "Fecha dep. SIM" },
+  { token: "{{mafia_depositado}}", label: "SIM depositado" },
+  { token: "{{fecha_deposito_mafia}}", label: "Fecha de depósito SIM" },
   { token: "{{archivos}}", label: "Documentos de la etapa (con link al portal)" },
 ] as const;
 

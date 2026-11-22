@@ -5,9 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { ESTADOS, type EstadoOperacion } from "@/lib/mock-data";
 import { getTodasOperaciones, normalizarOrden } from "@/lib/data";
 import { formatFecha } from "@/lib/utils";
-import { detectarCambios } from "@/lib/cambios-operacion";
-import { resolverDestinatariosAviso } from "@/lib/destinatarios";
-import { enviarAvisoCambioDatos } from "@/lib/email";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { detectarEventos, enviarEventos } from "@/lib/eventos-operacion";
+import type { OperacionAviso } from "@/lib/email-eventos";
+import type { TipoOperacion } from "@/lib/eventos";
 
 function optionalId(formData: FormData, key: string) {
   const value = String(formData.get(key) ?? "");
@@ -29,6 +30,19 @@ function fecha(formData: FormData, key: string) {
 
 function datosDeFormulario(formData: FormData) {
   return {
+    tipo: (String(formData.get("tipo") ?? "") === "exportacion"
+      ? "exportacion"
+      : "importacion") as TipoOperacion,
+    procedencia: texto(formData, "procedencia"),
+    destino: texto(formData, "destino"),
+    nombre_transporte: texto(formData, "nombre_transporte"),
+    vto_forzoso: fecha(formData, "vto_forzoso"),
+    fecha_salida: fecha(formData, "fecha_salida"),
+    cutoff_documental: fecha(formData, "cutoff_documental"),
+    cutoff_fisico: fecha(formData, "cutoff_fisico"),
+    cuit_ata: texto(formData, "cuit_ata"),
+    fecha_precumplido: fecha(formData, "fecha_precumplido"),
+    fecha_cumplido: fecha(formData, "fecha_cumplido"),
     orden: String(formData.get("orden") ?? ""),
     cliente_id: String(formData.get("cliente_id") ?? ""),
     exportador_id: optionalId(formData, "exportador_id"),
@@ -75,6 +89,65 @@ function datosDeFormulario(formData: FormData) {
   };
 }
 
+// Lee la carpeta ya guardada, detecta qué avisos por evento corresponden y los envía.
+async function avisarEventos(
+  supabase: SupabaseClient,
+  id: string,
+  anterior: Record<string, unknown> | null
+) {
+  const vacio = { eventos: 0, mails: 0 };
+  try {
+    const { data: actual } = await supabase
+      .from("operaciones")
+      .select("*, cliente:clientes(nombre, email_contacto), exportador:exportadores(nombre)")
+      .eq("id", id)
+      .maybeSingle();
+    if (!actual) return vacio;
+
+    const eventos = detectarEventos(anterior, actual);
+    if (eventos.length === 0) return vacio;
+
+    const cliente = actual.cliente as { nombre: string; email_contacto: string | null } | null;
+    if (!cliente) return vacio;
+
+    const exportador = actual.exportador as { nombre: string } | null;
+    const operacion: OperacionAviso = {
+      id,
+      tipo: (actual.tipo as TipoOperacion) ?? "importacion",
+      orden: actual.orden,
+      cliente: cliente.nombre,
+      orden_compra: actual.orden_compra,
+      awb_bl: actual.awb_bl,
+      contraparte: exportador?.nombre ?? null,
+      factura: actual.factura,
+      fecha_arribo: actual.fecha_arribo,
+      fecha_salida: actual.fecha_salida ?? null,
+      forwarder: actual.forwarder,
+      descripcion: actual.descripcion,
+      intervinientes: actual.intervinientes,
+      numero_oficializacion: actual.numero_oficializacion,
+      fecha_entrega: actual.fecha_entrega,
+      facturas_exelsia: actual.facturas_exelsia,
+      anticipo_solicitado: actual.anticipo_solicitado,
+      fecha_deposito_anticipo: actual.fecha_deposito_anticipo,
+      mafia_solicitado: actual.mafia_solicitado,
+      fecha_deposito_mafia: actual.fecha_deposito_mafia,
+    };
+
+    const resultado = await enviarEventos(
+      supabase,
+      operacion,
+      actual.cliente_id as string,
+      cliente.email_contacto,
+      eventos
+    );
+    return { eventos: resultado.eventos.length, mails: resultado.mails };
+  } catch (err) {
+    console.error("No se pudieron enviar los avisos de la carpeta:", err);
+    return vacio;
+  }
+}
+
 export async function crearOperacion(formData: FormData) {
   const supabase = await createClient();
 
@@ -86,6 +159,8 @@ export async function crearOperacion(formData: FormData) {
 
   if (error) throw error;
 
+  await avisarEventos(supabase, data.id as string, null);
+
   revalidatePath("/operaciones");
   revalidatePath("/dashboard");
   return data.id as string;
@@ -94,49 +169,18 @@ export async function crearOperacion(formData: FormData) {
 export async function actualizarOperacion(id: string, formData: FormData) {
   const supabase = await createClient();
 
-  const nuevos = datosDeFormulario(formData);
+  const { data: anterior } = await supabase.from("operaciones").select("*").eq("id", id).maybeSingle();
 
-  const { data: anterior } = await supabase
-    .from("operaciones")
-    .select("*, clientes(nombre, email_contacto)")
-    .eq("id", id)
-    .maybeSingle();
-
-  const { error } = await supabase.from("operaciones").update(nuevos).eq("id", id);
-
+  const { error } = await supabase.from("operaciones").update(datosDeFormulario(formData)).eq("id", id);
   if (error) throw error;
 
-  // Si cambió algún dato visible para el cliente, se le avisa en un único mail.
-  const cambios = detectarCambios(anterior, nuevos);
-  let avisados = 0;
-  if (anterior && cambios.length > 0) {
-    const cliente = anterior.clientes as unknown as {
-      nombre: string;
-      email_contacto: string | null;
-    } | null;
-    const { emails } = await resolverDestinatariosAviso(
-      supabase,
-      anterior.cliente_id as string,
-      anterior.estado as string,
-      cliente?.email_contacto ?? null
-    );
-    if (cliente && emails.length > 0) {
-      const enviado = await enviarAvisoCambioDatos({
-        email: emails,
-        operacionId: id,
-        cliente: cliente.nombre,
-        orden: nuevos.orden,
-        cambios,
-      });
-      if (enviado) avisados = emails.length;
-    }
-  }
+  const avisos = anterior ? await avisarEventos(supabase, id, anterior) : { eventos: 0, mails: 0 };
 
   revalidatePath(`/operaciones/${id}`);
   revalidatePath("/operaciones");
   revalidatePath("/dashboard");
 
-  return { cambios: cambios.length, avisados };
+  return avisos;
 }
 
 export type FilaImportOperacion = {

@@ -31,3 +31,26 @@ export async function archivosParaAviso(
     url,
   }));
 }
+
+// Documentos de la operación de las categorías indicadas, con el link al portal.
+export async function archivosParaTipos(
+  supabase: SupabaseClient,
+  operacionId: string,
+  tipos: string[]
+): Promise<ArchivoAviso[]> {
+  if (tipos.length === 0) return [];
+
+  const { data: archivos } = await supabase
+    .from("archivos_cliente")
+    .select("nombre_archivo, tipo")
+    .eq("operacion_id", operacionId)
+    .in("tipo", tipos)
+    .order("created_at");
+
+  const url = urlOperacionPortal(operacionId);
+  return (archivos ?? []).map((archivo) => ({
+    nombre: archivo.nombre_archivo as string,
+    tipo: (archivo.tipo as string | null) ?? null,
+    url,
+  }));
+}

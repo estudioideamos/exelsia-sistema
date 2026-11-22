@@ -72,6 +72,17 @@ export type OperacionRow = {
   fecha_factura_exelsia?: string | null;
   fecha_entrega?: string | null;
   ajuste?: number | null;
+  tipo?: "importacion" | "exportacion";
+  procedencia?: string | null;
+  destino?: string | null;
+  nombre_transporte?: string | null;
+  vto_forzoso?: string | null;
+  fecha_salida?: string | null;
+  cutoff_documental?: string | null;
+  cutoff_fisico?: string | null;
+  cuit_ata?: string | null;
+  fecha_precumplido?: string | null;
+  fecha_cumplido?: string | null;
   divisa: { nombre: string } | null;
   incoterm: { nombre: string } | null;
   via: { nombre: string } | null;
